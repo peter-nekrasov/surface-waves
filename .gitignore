@@ -1,0 +1,8 @@
+*.fig
+*.asv
+*.png
+*.pdf
+*.svg
+*.jpeg
+*.DS_store
+*.rtf
