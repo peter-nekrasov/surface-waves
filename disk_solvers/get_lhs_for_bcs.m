@@ -1,21 +1,23 @@
 function A = get_lhs_for_bcs(k,nu,n,R)
 
-src = [0; 0];
-targ = [R; 0];
+rho = 0;
 
-[h0,h0p,h0pp,h0ppp] = helmdiffgreen(k,src,targ);
-[k0,k0p,k0pp,k0ppp] = helmdiffgreen(1i*k,src,targ);
+hn = besselh(n,k*R);
+hnp = k/2*(besselh(n-1,k*R)-besselh(n+1,k*R));
+hnpp = (-k*R*besselh(n-1,k*R)...
+        +(n+n^2-k^2*R^2)*besselh(n,k*R))/R^2;
+hnppp = (k*R*(2+n^2-k^2*R^2)*besselh(-1+n,k*R)...
+         - (1+n)*(2*n+n^2-k^2*R^2)*besselh(n,k*R))/R^3;
 
-h0p = h0p(1,1,1);
-h0pp = h0pp(1,1,1);
-h0ppp = h0ppp(1,1,1);
+kn = besselk(n,k*R);
+knp = k/2*(-besselk(n-1,k*R)-besselk(n+1,k*R));
+knpp = (k*R*besselk(n-1,k*R)...
+        +(n+n^2+k^2*R^2)*besselk(n,k*R))/R^2;
+knppp = (-k*R*(2+n^2+k^2*R^2)*besselk(-1+n,k*R)...
+         - (1+n)*(2*n+n^2+k^2*R^2)*besselk(n,k*R))/R^3;
 
-k0p = k0p(1,1,1);
-k0pp = k0pp(1,1,1);
-k0ppp = k0ppp(1,1,1);
-
-A = [h0pp + nu/R*h0p - nu/R^2*n^2*h0, k0pp + nu/R*k0p - nu/R^2*n^2*k0; 
-    h0ppp + 1/R*h0pp - (1+n^2*(2-nu))/R^2*h0p + (3-nu)/R^3*n^2*h0, ...
-    k0ppp + 1/R*k0pp - (1+n^2*(2-nu))/R^2*k0p + (3-nu)/R^3*n^2*k0];
+A = [hnpp + nu/R*hnp - nu/R^2*n^2*hn, knpp + nu/R*knp - nu/R^2*n^2*kn; 
+    hnppp + 1/R*hnpp - (1+n^2*(2-nu))/R^2*hnp + (3-nu)/R^3*n^2*hn, ...
+    knppp + 1/R*knpp - (1+n^2*(2-nu))/R^2*knp + (3-nu)/R^3*n^2*kn];
 
 end
