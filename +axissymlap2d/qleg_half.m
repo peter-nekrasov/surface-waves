@@ -19,12 +19,12 @@ function [q0,q1,q0d] = qleg_half(t)
     inear = find(t<0.01);
     ifar  = find(t>100);
     imid  = find((t>=0.01).*(t<=100));
-    [qmm,qmpm] = chnk.axissymlap2d.qget_zero(1+t(imid));
-    [qmn] = chnk.axissymlap2d.qeval0_near(t(inear));
-    [qmpn] = chnk.axissymlap2d.qeval1_near(t(inear));
-    [qmdn] = chnk.axissymlap2d.qeval0der_near(t(inear));
-    [qmf] = chnk.axissymlap2d.qeval0_far(1+t(ifar));
-    [qmpf] = chnk.axissymlap2d.qeval1_far(1+t(ifar));
+    [qmm,qmpm] = axissymlap2d.qget_zero(1+t(imid));
+    [qmn] = axissymlap2d.qeval0_near(t(inear));
+    [qmpn] = axissymlap2d.qeval1_near(t(inear));
+    [qmdn] = axissymlap2d.qeval0der_near(t(inear));
+    [qmf] = axissymlap2d.qeval0_far(1+t(ifar));
+    [qmpf] = axissymlap2d.qeval1_far(1+t(ifar));
 
 
     

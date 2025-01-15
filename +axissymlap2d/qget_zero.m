@@ -1,9 +1,9 @@
 function [qm,qmp] = qget_zero(x)
 %
-% chnk.axissymlap2d.qget_zero evaluates the 
+% axissymlap2d.qget_zero evaluates the 
 %
         a = sqrt(2./(x+1));
-        [fF,fE] = chnk.axissymlap2d.gaus_agm(x);
+        [fF,fE] = axissymlap2d.gaus_agm(x);
 
         q0 = a.*fF;
         q1 = x.*q0-2*fE./(a);

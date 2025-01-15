@@ -1,6 +1,6 @@
 function [gvals, gdzs, gdrs, gdrps] = gfuncall(zk, r, rp, dr, z, zp, dz, maxm)
 %
-% chnk.axissymlap2d.gfuncall evaluates a collection of axisymmetric Helmholtz
+% axissymlap2d.gfuncall evaluates a collection of axisymmetric Helmholtz
 % Green's functions, defined by the expression:
 %
 %     gfunc(n) = pi*rp * \int_0^{2\pi} e^(i*k*|x-x'|)/|x - x'| e^(-i n t) dt 
@@ -10,7 +10,7 @@ function [gvals, gdzs, gdrs, gdrps] = gfuncall(zk, r, rp, dr, z, zp, dz, maxm)
 % gval(1) = mode -maxm, and gval(2*maxm+1) = mode maxm.
 %
 % The above scaling should be consistent with what is in
-% chnk.axissymlap2d.gfunc, which is for merely the zero-mode
+% axissymlap2d.gfunc, which is for merely the zero-mode
 % 
     twopi = 2*pi;
     fourpi = 4*pi;

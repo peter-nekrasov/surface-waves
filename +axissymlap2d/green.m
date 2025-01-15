@@ -26,7 +26,7 @@ function [val, grad] = green(src, targ, origin)
     dr = (rs-rt);
     z  = zeros(size(rt));
     zp = zeros(size(rt));
-    [g,gdz,gdr,gdrp] = chnk.axissymlap2d.gfunc(r,rp,dr,z,zp,dz);
+    [g,gdz,gdr,gdrp] = axissymlap2d.gfunc(r,rp,dr,z,zp,dz);
     
     val = g;
     gtmp(:,:,1) = gdr;

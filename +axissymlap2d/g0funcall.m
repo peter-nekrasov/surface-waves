@@ -1,7 +1,7 @@
 function [gvals, gdzs, gdrs, gdrps] = g0funcall(r, rp, dr, z, zp, dz, maxm)
 
 %
-% chnk.axissymlap2d.g0funcall evaluates a collection of axisymmetric Laplace
+% axissymlap2d.g0funcall evaluates a collection of axisymmetric Laplace
 % Green's functions, defined by the expression:
 %
 %     gfunc(n) = pi*rp * \int_0^{2\pi} 1/|x - x'| e^(-i n t) dt
@@ -15,7 +15,7 @@ function [gvals, gdzs, gdrs, gdrps] = g0funcall(r, rp, dr, z, zp, dz, maxm)
 % mode 0 and gval(maxm+1) = mode maxm. The function is even, so g_{-n} = g_n.
 %
 % The above scaling should be consistent with what is in
-% chnk.axissymlap2d.gfunc, which is for merely the zero-mode
+% axissymlap2d.gfunc, which is for merely the zero-mode
 % 
     
     twopi = 2*pi;
@@ -77,7 +77,7 @@ function [gvals, gdzs, gdrs, gdrps] = g0funcall(r, rp, dr, z, zp, dz, maxm)
 
     if (iffwd == 1)
 
-        [q0, q1, dq0] = chnk.axissymlap2d.qleg_half(xminus);
+        [q0, q1, dq0] = axissymlap2d.qleg_half(xminus);
         dq1 = (-q0 + x*q1)/2/(x+1)/xminus;
         
         half = done/2;
@@ -197,7 +197,7 @@ function [gvals, gdzs, gdrs, gdrps] = g0funcall(r, rp, dr, z, zp, dz, maxm)
     % !
     % ! normalize the values, and use a formula for the derivatives
     % !
-    [q0, q1, dq0] = chnk.axissymlap2d.qleg_half(xminus);
+    [q0, q1, dq0] = axissymlap2d.qleg_half(xminus);
     dq1 = (-q0 + x*q1)/2/(x+1)/xminus;
     % call axi_q2lege01(x, xminus, q0, q1, dq0, dq1)
 

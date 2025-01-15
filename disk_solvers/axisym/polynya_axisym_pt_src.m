@@ -39,9 +39,9 @@ sig_int_0 = zeros(int_chnkr.npt,1);
 sig_ext_0 = zeros(ext_chnkr.npt,1);
 sig_tot_0 = zeros(chnkr.npt,1);
 
-f_int = hkdiffgreen(k,[0;0],int_chnkr.r);
-f_ext = hkdiffgreen(k,[0;0],ext_chnkr.r);
-f0 = hkdiffgreen(k,[0;0],chnkr.r);
+f_int = flex2d.hkdiffgreen(k,[0;0],int_chnkr.r);
+f_ext = flex2d.hkdiffgreen(k,[0;0],ext_chnkr.r);
+f0 = flex2d.hkdiffgreen(k,[0;0],chnkr.r);
 
 % build the desired kernels
 
