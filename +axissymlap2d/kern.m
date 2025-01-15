@@ -55,7 +55,7 @@ targ = targinfo.r;
 
 if strcmpi(type, 'd')
     srcnorm = srcinfo.n;
-    [~, grad] = chnk.axissymlap2d.green(src, targ, origin);
+    [~, grad] = axissymlap2d.green(src, targ, origin);
     nx = repmat(srcnorm(1,:), nt, 1);
     ny = repmat(srcnorm(2,:), nt, 1);
     % Due to lack of translation invariance in r, no sign flip needed, 
@@ -65,7 +65,7 @@ end
 
 if strcmpi(type, 'sprime')
     targnorm = targinfo.n;
-    [~, grad] = chnk.axissymlap2d.green(src, targ, origin);
+    [~, grad] = axissymlap2d.green(src, targ, origin);
 
     nx = repmat((targnorm(1,:)).',1,ns);
     ny = repmat((targnorm(2,:)).',1,ns);
@@ -74,7 +74,7 @@ if strcmpi(type, 'sprime')
 end
 
 if strcmpi(type, 's')
-    submat = chnk.axissymlap2d.green(src, targ, origin);
+    submat = axissymlap2d.green(src, targ, origin);
     
 end
 

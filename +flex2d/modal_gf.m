@@ -37,17 +37,23 @@ if nargin < 4
     n = 0;
 end
 
+src = src.r;
+targ = targ.r;
+
 [~,ns] = size(src);
 [~,nt] = size(targ);
 
 rhos = repmat(src(1,:),nt,1);
 rhot = repmat(targ(1,:).',1,ns);
 
-rhogreater = rhos(rhos >= rhot) + rhot(rhot > rhos);
-rholesser = rhos(rhos < rhot) + rhot(rhot <= rhos);
+rhogreater = rhos;
+rholesser = rhos;
 
-val = pi*rhos/(2*k^2)*(1i/4*besselh(n,k*rhogreater)*besselj(n,k*rholesser) ...
-    - 1/(2*pi)*besselk(n,k*rhogreater)*besseli(n,k*rholesser));
+rhogreater(rhot > rhos) = rhot(rhot > rhos);
+rholesser(rhot <= rhos) = rhot(rhot <= rhos);
+
+val = rhos.*pi./(2*k^2).*(1i/4*besselh(n,k*rhogreater).*besselj(n,k*rholesser) ...
+    - 1/(2*pi)*besselk(n,k*rhogreater).*besseli(n,k*rholesser));
 
 end
 

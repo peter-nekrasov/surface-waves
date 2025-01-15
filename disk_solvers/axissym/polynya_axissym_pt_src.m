@@ -29,24 +29,32 @@ ext_chnkr = chunkerfunc(fcurve,cparams);
 
 chnkr = merge([int_chnkr ext_chnkr]);
 
-figure(1)
-clf
-plot(int_chnkr,'.')
-hold on
-plot(ext_chnkr,'.')
+% figure(1)
+% clf
+% plot(int_chnkr,'.')
+% hold on
+% plot(ext_chnkr,'.')
 
-sig_int = zeros(int_chnkr.npt,1);
-sig_ext = zeros(ext_chnkr.npt,1);
+sig_int_0 = zeros(int_chnkr.npt,1);
+sig_ext_0 = zeros(ext_chnkr.npt,1);
+sig_tot_0 = zeros(chnkr.npt,1);
 
 f_int = hkdiffgreen(k,[0;0],int_chnkr.r);
 f_ext = hkdiffgreen(k,[0;0],ext_chnkr.r);
 f0 = hkdiffgreen(k,[0;0],chnkr.r);
 
+% build the desired kernels
 
-fkern =  @(s,t) chnk.flex2d.kern(zk, s, t, 'modal-gf', coefs);        % build the desired kernel
+gkern =  @(s,t) flex2d.modal_gf(k, s, t, 0); 
+skern =  @(s,t) axissymlap2d.kern(s, t, [0;0], 's') / (2*pi^2); 
 
+opts = [];
+opts.sing = 'log';
 
-return 
+S = chunkermat(chnkr,gkern, opts);
+GS = chunkermat(chnkr,skern,opts);
+
+return
 
 while d > epsilon
     j = 0;
