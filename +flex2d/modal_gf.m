@@ -52,7 +52,7 @@ rholesser = rhos;
 rhogreater(rhot > rhos) = rhot(rhot > rhos);
 rholesser(rhot <= rhos) = rhot(rhot <= rhos);
 
-val = rhos.*pi./(2*k^2).*(1i/4*besselh(n,k*rhogreater).*besselj(n,k*rholesser) ...
+val = rhos.*pi./k^2.*(1i/4*besselh(n,k*rhogreater).*besselj(n,k*rholesser) ...
     - 1/(2*pi)*besselk(n,k*rhogreater).*besseli(n,k*rholesser));
 
 end
