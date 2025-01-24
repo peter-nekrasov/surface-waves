@@ -1,6 +1,5 @@
 function A = get_lhs_for_bcs(k,nu,n,R)
 
-rho = 0;
 
 hn = besselh(n,k*R);
 hnp = k/2*(besselh(n-1,k*R)-besselh(n+1,k*R));

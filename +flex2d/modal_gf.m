@@ -27,11 +27,7 @@ function [val] = modal_gf(k,src,targ,n)
 % src - (2,ns) array of source locations
 % targ - (2,nt) array of target locations
 % k - wave number, as above
-%
-% optional input:
-%
-% ifr2logr - boolean, default: false. If true, also subtract off the 
-%             k^2/(8pi) r^2 log r kernel
+% n - mode number
 
 if nargin < 4
     n = 0;

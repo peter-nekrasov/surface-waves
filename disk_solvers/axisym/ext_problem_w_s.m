@@ -2,57 +2,38 @@ clear
 close all
 addpath(genpath('../..'))
 
-R = sqrt(3);
+R = sqrt(5);
 nu = 0.3;
 n = 0;
-k = 2+0.1i;
-s = 1;
-
-w = 1;
-g = 1;
-alpha = 1;
 gamma = 1;
-beta = 1;
+k = 2+0.1i;
+s = 2;
 
 % f0 = get_rhs_vec_gaussian(s,nu,n,R);
 % A = get_lhs_for_bcs(k,nu,n,R);
 % vf = A \ f0; 
 % vf = [0;0];
-% epsilon = 1E-8;
-% d = 1;
+epsilon = 1E-8;
+d = 1;
 
 % create domains in chunkie 
 cparams = [];
 cparams.ifclosed = false;
-cparams.maxchunklen = 4 / abs(k);
+cparams.maxchunklen = 8 / abs(k);
+cparams.ta = R;
+cparams.tb = 300; % 10E5
 
 fcurve = @(t) [t(:).';0*t(:).'];
 
-cparams.ta = 0;
-cparams.tb = R; % 10E5
+chnkr = chunkerfunc(fcurve,cparams);
+chnkr = sort(chnkr);
 
-pref = [];
-pref.nchmax = 1;
-int_chnkr = chunkerfunc(fcurve,cparams,pref);
-int_chnkr = sort(int_chnkr);
+% figure(1)
+% clf
+% plot(chnkr,'.')
 
-cparams.ta = R;
-cparams.tb = 100; 
-
-ext_chnkr = chunkerfunc(fcurve,cparams);
-ext_chnkr = sort(ext_chnkr);
-
-chnkr = merge([int_chnkr ext_chnkr]);
- 
-figure(1)
-plot(int_chnkr,'.')
-hold on 
-plot(ext_chnkr,'.')
-
-f_ext = 0.1*exp(-(ext_chnkr.r(1,:)-8*R).^2/(2*s^2)); % + vf(1)*besselh(n,k*chnkr.r(1,:)) + vf(2)*besselk(n,k*chnkr.r(1,:));
-f_ext = f_ext.';
-
-f_int = 0*int_chnkr.r(1,:).';
+f = exp(-(chnkr.r(1,:)-10*R).^2/(2*s^2)); % + vf(1)*besselh(n,k*chnkr.r(1,:)) + vf(2)*besselk(n,k*chnkr.r(1,:));
+f = f.';
 
 % [~,~,u] = lege.exps(16);
 % [pols,~] = lege.pols(-1,15);
@@ -70,38 +51,33 @@ f_int = 0*int_chnkr.r(1,:).';
 % 
 % b = [gsupp + nu/R*gsup; gsuppp + 1/R*gsupp - 1/R^2*gsup];
 
-figure(2);
-plot(int_chnkr.r(1,:),real(f_int),ext_chnkr.r(1,:),real(f_ext))
+figure(1);
+plot(chnkr.r(1,:),real(f),chnkr.r(1,:),imag(f))
 title('f')
+hold on
 
 sig_n = zeros(chnkr.npt,1);
 
 % build the desired kernels
 
-gkern =  @(s,t) flex2d.bdd_modal_gf(k,R,nu,s,t,0); 
+gkern =  @(s,t) flex2d.ext_modal_gf(k,R,nu, s, t, 0); 
 skern =  @(s,t) axissymlap2d.kern(s, t, [0;0], 's') / (2*pi^2); 
 
 opts = [];
 opts.sing = 'log';
 
-G = chunkermat(ext_chnkr,gkern, opts);
+G = chunkermat(chnkr,gkern, opts);
 S = chunkermat(chnkr,skern, opts);
 
 % make derivatives 
 
-lhs = eye(chnkr.npt);
-lhs(1:int_chnkr.npt,:) = lhs(1:int_chnkr.npt,:) - w^2/g*S(1:int_chnkr.npt,:);
-lhs(int_chnkr.npt+1:end,:) = lhs(int_chnkr.npt+1:end,:) + gamma/alpha*G*S(int_chnkr.npt+1:end,:);
-rhs = [f_int; G*f_ext];
+lhs = eye(chnkr.npt) + gamma*G*S;
+rhs = G*f;
 sol = lhs\rhs;
 
 figure(2)
 plot(chnkr.r(1,:),real(sol),chnkr.r(1,:),imag(sol))
-title('solution ($\hat{\sigma}$)','Interpreter','latex')
-legend('real','imaginary')
-
-
-return
+title('solution')
 
 dmat = lege.dermat(16);
 sol = squeeze(reshape(sol,size(chnkr.r(1,:,:))));
@@ -123,6 +99,10 @@ figure(3)
 plot(rs,real(f_recon),rs,imag(f_recon))
 title('Lu + S[u](= f)')
 
+figure(4)
+plot(rs,real(f_recon-f),rs,imag(f_recon-f))
+title('residual error')
+
 % check that BCs are satisfied by the solution
 
 u1 = u(:,1);
@@ -138,3 +118,5 @@ bc1 = d2dr2 + nu/R*ddr;
 bc2 = d3dr3 + 1/R*d2dr2 - 1/R^2*ddr;
 
 rmpath(genpath('../..'))
+
+
