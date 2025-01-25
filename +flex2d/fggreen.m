@@ -1,32 +1,24 @@
-function out = green(src,targ,rts,ejs)
+function [val,grad,hess,der3,der4] = fggreen(src,targ,rts,ejs)
 %
-% computes the green's function centered at (x,y) = 0 for the 
+% computes the flexural gravity green's function for the 
 % integro-differential equation determined by the roots of the polynomial:
 %             z^5 - beta*z + gamma = 0
 %
-% output is a cell array with all the kernels needed to solve the adjointed
-% Lippman Schwinger equation: {val,hessxx,hessxy,hessyy,gradlapx,gradlapy}
-% where:
-% - val is the value of the Green's function centered at zero and
-%   evaluated at (x,y)
-% - hessxx is G_{xx}, hessxy is G_{xy}, 
-%   hessyy is G_{yy}
-% - gradlap is the gradient of the Laplacian, namely 
-%   gradlapx is G_{xxx} + G_{xyy}, gradlapy is G_{yxx} + G_{yyy}
+% output is a cell array with all the following kernels:
+% - grad(:,:,1) has G_{x1}, grad(:,:,2) has G_{x2}
+% - hess(:,:,1) has G_{x1x1}, hess(:,:,2) has G_{x1x2}, 
+% hess(:,:,3) has G_{x2x2}
+% - der3 has the third derivatives in the order G_{x1x1x1}, G_{x1x1x2}, 
+% G_{x1x2x2}, G_{x2x2x2}
+% - der4 has the fourth derivatives in the order G_{x1x1x1x1}, 
+% G_{x1x1x1x2}, G_{x1x1x2x2}, G_{x1x2x2x2}, G_{x2x2x2x2}
 %
 % input:
 %
-% x - x-coordinates array
-% y - y-coordinates array
-% beta - coefficient beta in the equation
-% gamma - coefficient gamma in the equation
-%
-% optional input:
-%
-% opt - bool, default: false. 
-%         Possible options are:
-%         opt = false => Green's function (and derivatives)
-%         opt = true => kernel used to evaluate phi on surface
+% src - (2,ns) array of source locations
+% targ - (2,nt) array of target locations
+% rts - (5,) roots of polynomials above 
+% ejs - (5,) coefficients of partial fraction expansion
 %
 
 [~,ns] = size(src);
@@ -49,8 +41,8 @@ r = sqrt(r2);
 
 val = 0;
 phi = 0;
-% gradx = 0;
-% grady = 0;
+gradx = 0;
+grady = 0;
 hessxx = 0;
 hessxy = 0;
 hessyy = 0;
@@ -64,19 +56,19 @@ for i = 1:5
 
     if (angle(rhoj) == 0) && (rhoj ~= 0)
 
-       [sk0,~,hesssk0,gradlapsk0] = struveKdiffgreen(rhoj,src,targ);
-       [h0,~,hessh0,thirdh0] = helmdiffgreen(rhoj,src,targ);
+       [sk0,gradsk0,hesssk0,gradlapsk0] = struveKdiffgreen(rhoj,src,targ);
+       [h0,gradh0,hessh0,thirdh0] = helmdiffgreen(rhoj,src,targ);
 
        h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
 
        h0 = -4i*h0;
-       % gradh0 = -4i*gradh0;
+       gradh0 = -4i*gradh0;
        
-       % h0x = gradh0(:,:,1);
-       % h0y = gradh0(:,:,2);
-       % 
-       % h0x(r == 0) = 0;
-       % h0y(r == 0) = 0;
+       h0x = gradh0(:,:,1);
+       h0y = gradh0(:,:,2);
+        
+       h0x(r == 0) = 0;
+       h0y(r == 0) = 0;
        
        h0xx = hessh0(:,:,1);
        h0xy = hessh0(:,:,2);
@@ -105,8 +97,8 @@ for i = 1:5
        h0xyy = -4i*h0xyy;
        h0yyy = -4i*h0yyy;
        
-       % sk0x = gradsk0(:,:,1);
-       % sk0y = gradsk0(:,:,2);
+       sk0x = gradsk0(:,:,1);
+       sk0y = gradsk0(:,:,2);
 
        sk0xx = hesssk0(:,:,1);
        sk0xy = hesssk0(:,:,2);
