@@ -6,22 +6,15 @@ R = sqrt(5);
 nu = 0.3;
 n = 0;
 gamma = 1;
-k = 2+0.1i;
+k = 5+0.2i;
 s = 2;
-
-% f0 = get_rhs_vec_gaussian(s,nu,n,R);
-% A = get_lhs_for_bcs(k,nu,n,R);
-% vf = A \ f0; 
-% vf = [0;0];
-epsilon = 1E-8;
-d = 1;
 
 % create domains in chunkie 
 cparams = [];
 cparams.ifclosed = false;
-cparams.maxchunklen = 8 / abs(k);
+cparams.maxchunklen = 32 / abs(k);
 cparams.ta = R;
-cparams.tb = 300; % 10E5
+cparams.tb = 100; % 10E5
 
 fcurve = @(t) [t(:).';0*t(:).'];
 
@@ -56,6 +49,7 @@ plot(chnkr.r(1,:),real(f),chnkr.r(1,:),imag(f))
 title('f')
 hold on
 
+
 sig_n = zeros(chnkr.npt,1);
 
 % build the desired kernels
@@ -78,6 +72,7 @@ sol = lhs\rhs;
 figure(2)
 plot(chnkr.r(1,:),real(sol),chnkr.r(1,:),imag(sol))
 title('solution')
+legend('real','imaginary')
 
 dmat = lege.dermat(16);
 sol = squeeze(reshape(sol,size(chnkr.r(1,:,:))));

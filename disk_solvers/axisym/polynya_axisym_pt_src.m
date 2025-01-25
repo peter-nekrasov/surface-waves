@@ -2,11 +2,11 @@ clear
 close all
 addpath(genpath('../..'))
 
-R = sqrt(3);
+R = 3*sqrt(5);
 nu = 0.3;
 n = 0;
-k = 2+0.1i;
-s = 1;
+k = 2+0.02i;
+s = 2;
 
 w = 1;
 g = 1;
@@ -24,7 +24,7 @@ beta = 1;
 % create domains in chunkie 
 cparams = [];
 cparams.ifclosed = false;
-cparams.maxchunklen = 4 / abs(k);
+cparams.maxchunklen = R;
 
 fcurve = @(t) [t(:).';0*t(:).'];
 
@@ -32,24 +32,30 @@ cparams.ta = 0;
 cparams.tb = R; % 10E5
 
 pref = [];
-pref.nchmax = 1;
+pref.nchmax = 2;
 int_chnkr = chunkerfunc(fcurve,cparams,pref);
 int_chnkr = sort(int_chnkr);
 
+pref = [];
+pref.nchmax = 199/R;
+cparams.maxchunklen = 1.1*R;
 cparams.ta = R;
-cparams.tb = 100; 
+cparams.tb = 300; 
 
 ext_chnkr = chunkerfunc(fcurve,cparams);
 ext_chnkr = sort(ext_chnkr);
 
 chnkr = merge([int_chnkr ext_chnkr]);
+
  
 figure(1)
 plot(int_chnkr,'.')
 hold on 
 plot(ext_chnkr,'.')
+title('chnkrs')
 
-f_ext = 0.1*exp(-(ext_chnkr.r(1,:)-8*R).^2/(2*s^2)); % + vf(1)*besselh(n,k*chnkr.r(1,:)) + vf(2)*besselk(n,k*chnkr.r(1,:));
+
+f_ext = exp(-(ext_chnkr.r(1,:)-8*R).^2/(2*s^2)); % + vf(1)*besselh(n,k*chnkr.r(1,:)) + vf(2)*besselk(n,k*chnkr.r(1,:));
 f_ext = f_ext.';
 
 f_int = 0*int_chnkr.r(1,:).';
@@ -78,7 +84,7 @@ sig_n = zeros(chnkr.npt,1);
 
 % build the desired kernels
 
-gkern =  @(s,t) flex2d.bdd_modal_gf(k,R,nu,s,t,0); 
+gkern =  @(s,t) flex2d.ext_modal_gf(k,R,nu,s,t,0); 
 skern =  @(s,t) axissymlap2d.kern(s, t, [0;0], 's') / (2*pi^2); 
 
 opts = [];
@@ -95,38 +101,44 @@ lhs(int_chnkr.npt+1:end,:) = lhs(int_chnkr.npt+1:end,:) + gamma/alpha*G*S(int_ch
 rhs = [f_int; G*f_ext];
 sol = lhs\rhs;
 
-figure(2)
+figure(3)
 plot(chnkr.r(1,:),real(sol),chnkr.r(1,:),imag(sol))
 title('solution ($\hat{\sigma}$)','Interpreter','latex')
 legend('real','imaginary')
+xlim([0 100])
 
-
-return
-
+Su = S*sol(:);
+uint = sol(1:int_chnkr.npt);
+Suint = Su(1:int_chnkr.npt);
+Suext = Su(int_chnkr.npt+1:end);
 dmat = lege.dermat(16);
 sol = squeeze(reshape(sol,size(chnkr.r(1,:,:))));
-dd = squeeze(chnkr.d(1,:,:));
-u = sol;
+dd = squeeze(ext_chnkr.d(1,:,:));
+u = sol(:,3:end);
 dudr = dmat*u./dd;
 d2udr2 = dmat*dudr./dd;
 d3udr3 = dmat*d2udr2./dd;
 d4udr4 = dmat*d3udr3./dd;
-Su = S*sol(:);
 
 %hold on
 %plot(chnkr.r(1,:),real(dudr(:)),chnkr.r(1,:),imag(dudr(:)))
 
-rs = chnkr.r(1,:);
-f_recon = d4udr4(:)+2./rs(:).*d3udr3(:)-1./rs(:).^2.*d2udr2(:)+1./rs(:).^3.*dudr(:)+Su(:)-k^4*u(:);
+rs = ext_chnkr.r(1,:);
+f_recon = d4udr4(:)+2./rs(:).*d3udr3(:)-1./rs(:).^2.*d2udr2(:)+1./rs(:).^3.*dudr(:)+Suext(:)-k^4*u(:);
 
-figure(3)
-plot(rs,real(f_recon),rs,imag(f_recon))
+figure(4)
+plot(rs,real(f_recon-f_ext),rs,imag(f_recon-f_ext))
 title('Lu + S[u](= f)')
+
+figure(5)
+rs = int_chnkr.r(1,:);
+plot(rs,real(uint-w^2/g*Suint),rs,imag(uint-w^2/g*Suint))
+title('u + S[u](= 0)')
 
 % check that BCs are satisfied by the solution
 
 u1 = u(:,1);
-ds = chnkr.d(1,:,1).';
+ds = ext_chnkr.d(1,:,1).';
 [~,~,v2c] = lege.exps(16);
 [pols,~] = lege.pols(-1,15);
 
