@@ -1,34 +1,35 @@
 clear 
 addpath(genpath('..')) 
 
-maxchunklens = [ 2.7 2.5  1.8  1.2  ]; 
-npts = maxchunklens*0;
-free_errors = maxchunklens*0;
-clamped_errors = maxchunklens*0;
-supported_errors = maxchunklens*0;
-
-zk = 8;
+zk = 1;
 nu = 1/3;
 
-thetas = 0:pi/6:2*pi-pi/6;
-[targets, ~, ~] = droplet(thetas);
-targets = targets*1.5;
-centre = [0.8 ; 0.5];
+% thetas = 0:pi/6:2*pi-pi/6;
+% [targets, ~, ~] = droplet(thetas);
+% targets = targets*1.5;
+
+[X,Y] = meshgrid(-6:0.1:6);
+targets = [X(:) Y(:)].';
+[~,na] = size(targets);
+
+centre = [0. ; 0.];
     
-% setting a chunk length helps when the
-                                    % frequency is known'
-chnkr = chunkerfunc(@(t) droplet(t), cparams);
+cparams = [];
+cparams.maxchunklen = 2;
+
+chnkr = chunkerfunc(@(t) circle(t),cparams);
 chnkr = chnkr.sort();
 
 figure(1)                                                   % plot the chunker-object (supposed to be a circle centered at 1 with radius 1)
 clf
+scatter(targets(1,:),targets(2,:),36,'filled')
+hold on 
+scatter(centre(1),centre(2),36,'filled')
+hold on
 plot(chnkr, '-x')
 hold on
 quiver(chnkr)
 hold on 
-scatter(targets(1,:),targets(2,:),36,'filled')
-hold on 
-scatter(centre(1),centre(2),36,'filled')
 axis equal
 drawnow
     
@@ -84,7 +85,6 @@ D = kron(eye(chnkr.npt), D);
 
 lhs =  D + sysmat;
 
-zkimag = (1i)*zk;
 [~, ~, hess, third, ~] = flex2d.hkdiffgreen(zk, centre, chnkr.r);
 
 nx = chnkr.n(1,:).'; 
@@ -97,10 +97,8 @@ ds = sqrt(dx.*dx+dy.*dy);
 taux = (dx./ds); % normalization
 tauy = (dy./ds);
 
-
 firstbc = 1/(2*zk^2).*(hess(:, :, 1).*(nx.*nx) + hess(:, :, 2).*(2*nx.*ny) + hess(:, :, 3).*(ny.*ny))+...
            coefs(1)/(2*zk^2).*(hess(:, :, 1).*(taux.*taux) + hess(:, :, 2).*(2*taux.*tauy) + hess(:, :, 3).*(tauy.*tauy));
-
 
 secondbc = 1./(2*zk^2).*(third(:, :, 1).*(nx.*nx.*nx) + third(:, :, 2).*(3*nx.*nx.*ny) +...
        third(:, :, 3).*(3*nx.*ny.*ny) + third(:, :, 4).*(ny.*ny.*ny))+...
@@ -118,65 +116,51 @@ rhs(2:2:end) = secondbc;
 
 sol = lhs\rhs;
 
-rho1 = sol(1:2:end);                                    % first density
-rho2 = sol(2:2:end);        
+rho1 = sol(1:2:end);                              
+rho2 = sol(2:2:end);    
 
+in = chunkerinterior(chnkr, targets); 
+out = ~in; 
+
+true_sol = zeros(na, 1);
+utarg = zeros(na, 1);
 
 ikern1 = @(s,t) flex2d.kern(zk, s, t, 'free plate eval first', coefs);                              % build the kernel of evaluation          
 ikern2 = @(s,t) flex2d.kern(zk, s, t, 'free plate eval second');
 ikern3 = @(s,t) flex2d.kern(zk, s, t, 'free plate eval first hilbert',coefs);
 
-coupled = chunkerkerneval(chnkr, ikern3, H*rho1, targets);
+coupled = chunkerkerneval(chnkr, ikern3, H*rho1, targets(:,out));
 
 
 start1 = tic;
-utarg = chunkerkerneval(chnkr, ikern1,rho1, targets) + coupled +chunkerkerneval(chnkr, ikern2, rho2, targets);
+Dsol = chunkerkerneval(chnkr, ikern1,rho1, targets(:,out)) + coupled +chunkerkerneval(chnkr, ikern2, rho2, targets(:,out));
 t2 = toc(start1);
 fprintf('%5.2e s : time for kernel eval (for plotting)\n',t2)
 
+[val,~] = flex2d.hkdiffgreen(zk,centre,targets(:,out));     
 
-
-[val,~] = flex2d.hkdiffgreen(zk,centre,targets);        % Hankel part
-
-true_sol = 1/(2*zk^2).*val ;
-
-uerr = utarg - true_sol;
-%    uerr = uerr ./  max(abs(true_sol));
-uerr = uerr ./  (chnkr.wts(:).'*(abs(rho1) + abs(rho2)));
+utarg(out) = Dsol;
+true_sol(out) = 1/(2*zk^2).*val;
 
 
 %%
+utarg = reshape(utarg,size(X));
+true_sol = reshape(true_sol,size(X));
+uerr = utarg - true_sol;
 
-figure(2)
+figure(1);
 tiledlayout(1,2)
 nexttile
-loglog(npts , clamped_errors, '.-', npts, free_errors,'.-', npts, supported_errors,'.-', MarkerSize=20)
-%loglog(npts, supported_errors,'.-', MarkerSize=20)
-hold on 
-loglog(npts(2:end-2), 10^26.5.*npts(2:end-2).^(-16),'--k')
+h = pcolor(X,Y,real(utarg));
+colorbar
 hold on
-%legend('supported plate','n^{-12}')
-legend('Clamped Plate','Free Plate','Supported Plate', 'n^{-16}')
-xlabel('N')
-ylabel('Relative error')
-title('Analytic solution test')
+set(h,'EdgeColor','None'); hold on;
 
-nexttile
-length = maxchunklens(1);
-cparams.maxchunklen = length;       % setting a chunk length helps when the
-                                    % frequency is known'
-chnkr = chunkerfunc(@(t) droplet(t), cparams);
-chnkr = chnkr.sort();
+nexttile 
+h = pcolor(X,Y,log10(abs(true_sol-utarg)));
+colorbar
+hold on
+set(h,'EdgeColor','None'); hold on;
 
-plot(chnkr, '-xk')
-hold on 
-scatter(targets(1,:),targets(2,:),36,'filled')
-hold on 
-scatter(centre(1),centre(2),36,'filled')
-xlim([-3.5 3.5])
-ylim([-2.5 2.5])
+title("Absolute error (free plate kernel on a starfish)", 'FontSize',16)
 
-% Integral of absolute value of density on boundary 
-% Maximum of density on boundary 
-
-rmpath(genpath('..')) 

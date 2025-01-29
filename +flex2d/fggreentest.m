@@ -1,16 +1,17 @@
 % testing greens function derivatives using finite differences 
 
+
 src = [0; 0];
 h = 0.05;
 center = [1;1];
 targs = [center(1)-4*h:h:center(1)+4*h; center(2) + zeros(1,9)];
 rhoj = sqrt(2);
 
-[rts,ejs] = find_roots(3,-1);
-[val,grad,hess,third,fourth] = flex2d.fggreen(src,targs,rts,ejs);
+[rts,ejs] = flex2d.find_roots(3,-1);
+[val,grad,hess,third,fourth] = flex2d.fggreen(src,targs,rts,ejs,true);
 
 targs = [center(1) + zeros(1,9); center(2)-4*h:h:center(2)+4*h];
-[valy,grady,hessy,thirdy,fourthy] = flex2d.fggreen(src,targs,rts,ejs);
+[valy,grady,hessy,thirdy,fourthy] = flex2d.fggreen(src,targs,rts,ejs,true);
 
 dd = [1/280	-4/105	1/5	-4/5	0	4/5	-1/5	4/105	-1/280];
 

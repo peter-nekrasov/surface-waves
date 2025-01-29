@@ -1,4 +1,4 @@
-function [val,grad,hess,third,fourth] = fggreen(src,targ,rts,ejs)
+function [val,grad,hess,third,fourth] = fggreen(src,targ,rts,ejs,ifr2logr)
 %
 % computes the flexural gravity green's function for the 
 % integro-differential equation determined by the roots of the polynomial:
@@ -20,6 +20,15 @@ function [val,grad,hess,third,fourth] = fggreen(src,targ,rts,ejs)
 % rts - (5,) roots of polynomials above 
 % ejs - (5,) coefficients of partial fraction expansion
 %
+% optional input:
+%
+% ifr2logr - boolean, default: false. If true, also subtract off the 
+%             k^2/(8pi) r^2 log r kernel
+
+if nargin < 5
+    ifr2logr = false;
+end
+
 
 [~,ns] = size(src);
 [~,nt] = size(targ);
@@ -68,8 +77,8 @@ for i = 1:5
 
     if (angle(rhoj) == 0) && (rhoj ~= 0)
 
-       [sk0,gradsk0,hesssk0,thirdsk0,fourthsk0] = struveKdiffgreen(rhoj,src,targ);
-       [h0,gradh0,hessh0,thirdh0,fourthh0] = helmdiffgreen(rhoj,src,targ);
+       [sk0,gradsk0,hesssk0,thirdsk0,fourthsk0] = flex2d.struveKdiffgreen(rhoj,src,targ,ifr2logr);
+       [h0,gradh0,hessh0,thirdh0,fourthh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
 
        h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
 
@@ -162,7 +171,7 @@ for i = 1:5
 
     elseif rhoj ~= 0
 
-       [sk0,gradsk0,hesssk0,thirdsk0,fourthsk0] = struveKdiffgreen(-rhoj,src,targ);
+       [sk0,gradsk0,hesssk0,thirdsk0,fourthsk0] = flex2d.struveKdiffgreen(-rhoj,src,targ,ifr2logr);
 
        sk0x = gradsk0(:,:,1);
        sk0y = gradsk0(:,:,2);

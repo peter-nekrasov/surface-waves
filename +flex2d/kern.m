@@ -88,7 +88,6 @@ if strcmpi(type, 'clamped-plate')
    [~, ~, hess, third, ~] = flex2d.hkdiffgreen(zk, src, targ); 
 
    [~, ~, ~, ~, forth] = flex2d.hkdiffgreen(zk, src, targ, true);
-   [~, ~, ~, ~, forthbh] = flex2d.bhgreen(src, targ);  
 
    dx = repmat(srctang(1,:),nt,1);
    dy = repmat(srctang(2,:),nt,1);
@@ -1587,8 +1586,10 @@ if strcmpi(type, 'fluid problem second evaluation hilbert')
 
    submat = (1/(2*zk^2).*(hess(:, :, 1).*(taux.*taux) + hess(:, :, 2).*(2*taux.*tauy) + hess(:, :, 3).*(tauy.*tauy))-...
            1/(2*zk^2).*(hessK(:, :, 1).*(taux.*taux) + hessK(:, :, 2).*(2*taux.*tauy) + hessK(:, :, 3).*(tauy.*tauy))); %  G_{tauy tauy}
-
 end
+
+
+
 
 end
 
