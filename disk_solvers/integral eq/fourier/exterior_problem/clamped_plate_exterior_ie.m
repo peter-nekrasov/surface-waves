@@ -4,31 +4,30 @@ addpath(genpath('../..'))
 
 [rs,~,v2c] = lege.exps(16);
 [pols,~] = lege.pols(-1,15);
-
 rs = rs/8 + 1/8;
 
 zk = 2;
 R = sqrt(2);
 
+[X1,X2]=meshgrid(-8:0.1:8);
+u = 0*X1;
+true_sol = 0*X1;
+RX = sqrt(X1.^2+X2.^2);
+out = (RX > R);
+targs = [X1(out) X2(out)].';
 
 % calculate fourier modes 
 
-dt = 0.001;
+N = 100;
+dt = 2*pi/N;
 thetas = dt:dt:2*pi;
 rho1 = thetas*0;
 rho2 = thetas*0;
 
-N = 10;
-
-src = [0;0];
+src = [0.3;-0.3];
 targ = [R;0];
 
-% [val,grad] = flex2d.hkdiffgreen(zk,src,targ);
-% 
-% bc1 = 1/(2*zk^2)*val;
-% bc2 = 1/(2*zk^2)*grad(1,1,1);
-
-for n = -N:N
+for n = -N/4:N/4
 
     k11s = [];
     k12s = [];
@@ -37,10 +36,10 @@ for n = -N:N
     
     for i = 1:16
         R2 = R+rs(i);
-        k11s = [k11s; integral(@(t) R*exp(1i*n*t).*K11(zk,R,R2,t),0,2*pi)];
-        k12s = [k12s; integral(@(t) R*exp(1i*n*t).*K12(zk,R,R2,t),0,2*pi)];
-        k21s = [k21s; integral(@(t) R*exp(1i*n*t).*K21(zk,R,R2,t),0,2*pi)];
-        k22s = [k22s; integral(@(t) R*exp(1i*n*t).*K22(zk,R,R2,t),0,2*pi)];
+        k11s = [k11s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K11(zk,R,R2,t),0,2*pi)];
+        k12s = [k12s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K12(zk,R,R2,t),0,2*pi)];
+        k21s = [k21s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K21(zk,R,R2,t),0,2*pi)];
+        k22s = [k22s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K22(zk,R,R2,t),0,2*pi)];
     end
     
     k11 = pols.'*v2c*k11s;
@@ -52,24 +51,22 @@ for n = -N:N
 
     [val,grad] = flex2d.hkdiffgreen(zk,src,targ);
     
-    bc1 = integral(@(t) 1/(2*pi)*exp(1i*n*t).*BC1(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
-    bc2 = integral(@(t) 1/(2*pi)*exp(1i*n*t).*BC2(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
+    bc1 = integral(@(t) exp(1i*n*t).*BC1(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
+    bc2 = integral(@(t) exp(1i*n*t).*BC2(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
     rhs = exp(-1i*n*atan2(src(2),src(1)))*[bc1;bc2];
     
     sol = lhs \ rhs;
     
-
     rho1 = rho1+sol(1)*exp(1i*n*thetas);
     rho2 = rho2+sol(2)*exp(1i*n*thetas);
 
 end
 
-new_targs = [R:0.1:R+1;R:0.1:R+1];
 srcs = R*[cos(thetas); sin(thetas)];
 
-[~,~,hess,third] = flex2d.hkdiffgreen(zk,srcs,new_targs);
+[~,~,hess,third] = flex2d.hkdiffgreen(zk,srcs,targs);
 
-[~,nt] = size(new_targs);
+[~,nt] = size(targs);
 
 nx = cos(thetas).';
 ny = sin(thetas).';
@@ -90,13 +87,36 @@ K1 = -(1/(2*zk^2).*(third(:, :, 1).*(nx.*nx.*nx) + third(:, :, 2).*(3*nx.*nx.*ny
 K2 = -(1/(2*zk^2).*(hess(:, :, 1).*(nx.*nx) + hess(:, :, 2).*(2*nx.*ny) + hess(:, :, 3).*(ny.*ny)))+...
       (1/(2*zk^2).*(hess(:, :, 1).*(taux.*taux) + hess(:, :, 2).*(2*taux.*tauy) + hess(:, :, 3).*(tauy.*tauy))); % -G_{ny ny}  + G_{tauy tauy}
 
-utarg = K1*rho1.'*R*dt + K2*rho2.'*R*dt;
+u(out) = K1*rho1.'*R*dt + K2*rho2.'*R*dt;
+ 
+[G0,~] = flex2d.hkdiffgreen(zk,src,targs);
+true_sol(out) = G0/(2*zk^2);
 
-[true_sol,~] = flex2d.hkdiffgreen(zk,src,new_targs);
-true_sol = true_sol/(2*zk^2);
+%%
 
-err = max(abs(utarg - true_sol)) ./ max(abs(true_sol))
 
+set(groot, 'DefaultSurfaceEdgeColor', 'none')
+tiledlayout(1,3);
+nexttile
+pcolor(X1,X2,real(u));
+hold on
+pos = [-R -R 2*R 2*R];
+rectangle('Position',pos,'Curvature',[1 1],'FaceColor','white')
+title('BIE/Fourier Solver')
+colorbar
+
+nexttile
+pcolor(X1,X2,real(true_sol));
+rectangle('Position',pos,'Curvature',[1 1],'FaceColor','white')
+title('Analytic Solution')
+colorbar
+
+nexttile
+err = abs(u - true_sol) ;
+pcolor(X1,X2,log10(abs(err)));
+rectangle('Position',pos,'Curvature',[1 1],'FaceColor','white')
+title('Absolute Error')
+colorbar
 
 function val = K11(zk,R1,rs,t)
     
