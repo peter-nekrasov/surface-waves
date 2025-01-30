@@ -13,7 +13,7 @@ R = sqrt(2);
 u = 0*X1;
 true_sol = 0*X1;
 RX = sqrt(X1.^2+X2.^2);
-out = (RX > R);
+out = (RX > 1.1*R);
 targs = [X1(out) X2(out)].';
 
 % calculate fourier modes 
@@ -36,10 +36,10 @@ for n = -N/4:N/4
     
     for i = 1:16
         R2 = R+rs(i);
-        k11s = [k11s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K11(zk,R,R2,t),0,2*pi)];
-        k12s = [k12s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K12(zk,R,R2,t),0,2*pi)];
-        k21s = [k21s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K21(zk,R,R2,t),0,2*pi)];
-        k22s = [k22s; integral(@(t) (2*pi*R)*exp(1i*n*t).*K22(zk,R,R2,t),0,2*pi)];
+        k11s = [k11s; integral(@(t) exp(1i*n*t).*K11(zk,R,R2,t),0,2*pi)];
+        k12s = [k12s; integral(@(t) exp(1i*n*t).*K12(zk,R,R2,t),0,2*pi)];
+        k21s = [k21s; integral(@(t) exp(1i*n*t).*K21(zk,R,R2,t),0,2*pi)];
+        k22s = [k22s; integral(@(t) exp(1i*n*t).*K22(zk,R,R2,t),0,2*pi)];
     end
     
     k11 = pols.'*v2c*k11s;
@@ -48,8 +48,6 @@ for n = -N/4:N/4
     k22 = pols.'*v2c*k22s;
     
     lhs = [k11, k12; k21, k22];
-
-    [val,grad] = flex2d.hkdiffgreen(zk,src,targ);
     
     bc1 = integral(@(t) exp(1i*n*t).*BC1(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
     bc2 = integral(@(t) exp(1i*n*t).*BC2(zk,sqrt(src(1)^2+src(2)^2),R,t),0,2*pi);
@@ -87,7 +85,7 @@ K1 = -(1/(2*zk^2).*(third(:, :, 1).*(nx.*nx.*nx) + third(:, :, 2).*(3*nx.*nx.*ny
 K2 = -(1/(2*zk^2).*(hess(:, :, 1).*(nx.*nx) + hess(:, :, 2).*(2*nx.*ny) + hess(:, :, 3).*(ny.*ny)))+...
       (1/(2*zk^2).*(hess(:, :, 1).*(taux.*taux) + hess(:, :, 2).*(2*taux.*tauy) + hess(:, :, 3).*(tauy.*tauy))); % -G_{ny ny}  + G_{tauy tauy}
 
-u(out) = K1*rho1.'*R*dt + K2*rho2.'*R*dt;
+u(out) = K1*rho1.'*dt/(2*pi) + K2*rho2.'*dt/(2*pi);
  
 [G0,~] = flex2d.hkdiffgreen(zk,src,targs);
 true_sol(out) = G0/(2*zk^2);
