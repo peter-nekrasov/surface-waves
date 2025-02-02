@@ -71,46 +71,115 @@ end
 
 zt = r*rhoj;
 [cr0,cr1] = flex2d.struveR(zt);
-[h0,gradh0,hessh0,thirdh0,fourh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
 
-h0x = gradh0(:,:,1);
-h0y = gradh0(:,:,2);
+if nargout == 1
+    [h0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
 
-h0xx = hessh0(:,:,1);
-h0xy = hessh0(:,:,2);
-h0yy = hessh0(:,:,3);
+    h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+    h0 = -4i*h0;
+elseif nargout == 2 
+    [h0,gradh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
 
-h0xxx = thirdh0(:,:,1);
-h0xxy = thirdh0(:,:,2);
-h0xyy = thirdh0(:,:,3);
-h0yyy = thirdh0(:,:,4);
+    h0x = gradh0(:,:,1);
+    h0y = gradh0(:,:,2);
 
-h0xxxx = fourh0(:,:,1);
-h0xxxy = fourh0(:,:,2);
-h0xxyy = fourh0(:,:,3);
-h0xyyy = fourh0(:,:,4);
-h0yyyy = fourh0(:,:,5);
+    h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+    h0 = -4i*h0;
 
-h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
-h0 = -4i*h0;
+    h0x = -4i*h0x;
+    h0y = -4i*h0y;
+elseif nargout == 3
+    [h0,gradh0,hessh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
 
-h0x = -4i*h0x;
-h0y = -4i*h0y;
+    h0x = gradh0(:,:,1);
+    h0y = gradh0(:,:,2);
 
-h0xx = -4i*h0xx;
-h0xy = -4i*h0xy;
-h0yy = -4i*h0yy;
+    h0xx = hessh0(:,:,1);
+    h0xy = hessh0(:,:,2);
+    h0yy = hessh0(:,:,3);
 
-h0xxx = -4i*h0xxx;
-h0xxy = -4i*h0xxy;
-h0xyy = -4i*h0xyy;
-h0yyy = -4i*h0yyy;
+    h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+    h0 = -4i*h0;
 
-h0xxxx = -4i*h0xxxx;
-h0xxxy = -4i*h0xxxy;
-h0xxyy = -4i*h0xxyy;
-h0xyyy = -4i*h0xyyy;
-h0yyyy = -4i*h0yyyy;
+    h0x = -4i*h0x;
+    h0y = -4i*h0y;
+
+    h0xx = -4i*h0xx;
+    h0xy = -4i*h0xy;
+    h0yy = -4i*h0yy;
+elseif nargout == 4
+    [h0,gradh0,hessh0,thirdh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
+
+    h0x = gradh0(:,:,1);
+    h0y = gradh0(:,:,2);
+
+    h0xx = hessh0(:,:,1);
+    h0xy = hessh0(:,:,2);
+    h0yy = hessh0(:,:,3);
+
+    h0xxx = thirdh0(:,:,1);
+    h0xxy = thirdh0(:,:,2);
+    h0xyy = thirdh0(:,:,3);
+    h0yyy = thirdh0(:,:,4);
+
+    h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+    h0 = -4i*h0;
+
+    h0x = -4i*h0x;
+    h0y = -4i*h0y;
+
+    h0xx = -4i*h0xx;
+    h0xy = -4i*h0xy;
+    h0yy = -4i*h0yy;
+
+    h0xxx = -4i*h0xxx;
+    h0xxy = -4i*h0xxy;
+    h0xyy = -4i*h0xyy;
+    h0yyy = -4i*h0yyy;
+elseif nargout == 5
+    [h0,gradh0,hessh0,thirdh0,fourh0] = flex2d.helmdiffgreen(rhoj,src,targ,ifr2logr);
+
+    h0x = gradh0(:,:,1);
+    h0y = gradh0(:,:,2);
+
+    h0xx = hessh0(:,:,1);
+    h0xy = hessh0(:,:,2);
+    h0yy = hessh0(:,:,3);
+
+    h0xxx = thirdh0(:,:,1);
+    h0xxy = thirdh0(:,:,2);
+    h0xyy = thirdh0(:,:,3);
+    h0yyy = thirdh0(:,:,4);
+
+    h0xxxx = fourh0(:,:,1);
+    h0xxxy = fourh0(:,:,2);
+    h0xxyy = fourh0(:,:,3);
+    h0xyyy = fourh0(:,:,4);
+    h0yyyy = fourh0(:,:,5);
+
+    h0(zt == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+    h0 = -4i*h0;
+
+    h0x = -4i*h0x;
+    h0y = -4i*h0y;
+
+    h0xx = -4i*h0xx;
+    h0xy = -4i*h0xy;
+    h0yy = -4i*h0yy;
+
+    h0xxx = -4i*h0xxx;
+    h0xxy = -4i*h0xxy;
+    h0xyy = -4i*h0xyy;
+    h0yyy = -4i*h0yyy;
+
+    h0xxxx = -4i*h0xxxx;
+    h0xxxy = -4i*h0xxxy;
+    h0xxyy = -4i*h0xxyy;
+    h0xyyy = -4i*h0xyyy;
+    h0yyyy = -4i*h0yyyy;
+end
+
+if nargout > 0
 
 val = -1i*cr0+1i*h0;
 
@@ -118,7 +187,10 @@ if ilow
     val = conj(val);
 end
 
+end
+
 if nargout > 1
+
 cr0x = -rhoj*dx./r.*cr1;
 cr0y = -rhoj*dy./r.*cr1;
 

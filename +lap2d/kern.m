@@ -67,7 +67,7 @@ end
 
 
 if strcmpi(type,'s')
-    submat = chnk.lap2d.green(src,targ);
+    submat = lap2d.green(src,targ);
 end
 
 if strcmpi(type,'c')
