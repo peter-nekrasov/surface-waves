@@ -1,4 +1,4 @@
-function [val,grad] = green(k,src,targ)
+function [val,grad,hess,third] = green(k,src,targ)
 %FLEX2D.helm1d evaluate the helmholtz green's function in 1d
 % for the given sources and targets
 %
@@ -18,3 +18,9 @@ rx = xt-xs;
 val = exp(1i*k*abs(rx))/(2i*k);
 
 grad = 1/2*sign(rx).*exp(1i*k*abs(rx));
+
+hess = (1i*k)*exp(1i*k*abs(rx))/2;
+
+third = -k^2*sign(rx).*exp(1i*k*abs(rx))/2;
+
+end
