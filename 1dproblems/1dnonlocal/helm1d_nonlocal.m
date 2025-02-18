@@ -2,7 +2,7 @@ close all
 
 L = 10;
 
-beta = 1+0.4i;
+beta = 1+0.3i;
 gamma = 1;
 [rts,ejs] = helm1d.find_roots(beta,gamma);
 k = rts(abs(angle(rts)) == min(abs(angle(rts))));
