@@ -19,7 +19,7 @@ function [rts,ejs] = find_roots(beta,gamma)
     rts1 = eig(C);
     rts = bring_refine_rts(rts1,d1,d0);
     
-    ejs = 1./fp(rts); % partial fraction coefficients for 1/f
+    ejs = -1./fp(rts); % partial fraction coefficients for 1/f
 
 end
 

@@ -6,6 +6,7 @@ function [cvals] = expeval(czs,ifexps)
 
     ifloc = find(abs(czs) <= 2);
     iffar = find(abs(czs) >2);
+    ifzero = find(abs(czs) == 0);
     
     if (numel(ifloc))
     cloc = expeval_tayl(czs(ifloc));
@@ -14,6 +15,9 @@ function [cvals] = expeval(czs,ifexps)
     if (numel(iffar)>0)
     cfar = expeval_lentz(czs(iffar));
     cvals(iffar) = cfar;
+    end
+    if (numel(ifzero)>0)
+    cvals(ifzero) = 0;
     end
 
     if ((nargin>1) && ifexps)
