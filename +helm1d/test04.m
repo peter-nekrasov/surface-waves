@@ -1,14 +1,17 @@
-L = 100000;
+% testing that the GF integrates to 0
 
-beta = 1+0.1i;
-gamma = 1;
-[rts,ejs] = helm1d.find_roots(beta,gamma);
+L = 10000;
+
+alpha = 2;
+beta = 2+0.1i;
+gamma = 3;
+[rts,ejs] = helm1d.find_roots(alpha,beta,gamma);
 k = rts(abs(angle(rts)) == min(abs(angle(rts))));
 
 % create domains in chunkie 
 cparams = [];
 cparams.ifclosed = false;
-cparams.maxchunklen = 16;
+cparams.maxchunklen = 5;
 cparams.ta = 0;
 cparams.tb = L; 
 

@@ -1,10 +1,11 @@
 close all
 
-L = 10;
+L = 10; % width of polynya
 
-beta = 1+0.3i;
-gamma = 1;
-[rts,ejs] = helm1d.find_roots(beta,gamma);
+alpha = -0.5;
+beta = -1-0.2i;
+gamma = -2;
+[rts,ejs] = helm1d.find_roots(alpha,beta,gamma);
 k = rts(abs(angle(rts)) == min(abs(angle(rts))));
 
 left_bd = 0;
@@ -14,8 +15,7 @@ right_bd = L;
 cparams = [];
 cparams.ifclosed = false;
 cparams.maxchunklen = 8 / abs(k);
-cparams.ta = -100;
-%% 
+cparams.ta = -120; 
 cparams.tb = left_bd; 
 
 fcurve = @(t) [t(:).'; 0*t(:).'];
@@ -24,7 +24,7 @@ left_chnkr = chunkerfunc(fcurve,cparams);
 left_chnkr = sort(left_chnkr);
 
 cparams.ta = right_bd;
-cparams.tb = 100; 
+cparams.tb = 80; 
 
 right_chnkr = chunkerfunc(fcurve,cparams);
 right_chnkr = sort(right_chnkr);
@@ -54,7 +54,7 @@ title('chnkr')
 
 L0 = -4*L; 
 
-s = 2;
+s = 1;
 f = exp(-(left_chnkr.r(1,:)-L0).^2/(2*s^2));
 f = f.';
 
@@ -81,9 +81,6 @@ opts.sing = 'removable';
 opts2 = [];
 opts2.sing = 'log';
 
-
-%% Method 4, use different representation 
-
 lhs = zeros(N_int+2);
 
 %S_tot = chunkermat(tot_chnkr,skern,opts2);
@@ -94,21 +91,20 @@ Gphi_int = chunkermat(int_chnkr,gphikern,opts);
 Gphi_tot = chunkermat(tot_chnkr,gphikern,opts);
 delGphi_int = chunkermat(int_chnkr,delgphikern,opts2);
 delGphi_tot = chunkermat(tot_chnkr,delgphikern,opts2);
-SG_phi_int = 1/gamma*(S_int - beta*Gphi_int - delGphi_int);
+SG_phi_int = -1/gamma*(S_int + beta/2*Gphi_int + alpha/2*delGphi_int);
 
-lhs(1:N_int,1:N_int) = eye(N_int) - beta*Gs_int - gamma*Gphi_int ...
-    - S_int + beta*Gphi_int + gamma*SG_phi_int;
+lhs(1:N_int,1:N_int) = eye(N_int)/2 + beta/4*Gs_int + gamma/2*Gphi_int ...
+    + gamma*S_int + gamma*beta/2*Gphi_int + gamma^2*SG_phi_int;
 
-lhs(1:N_int,N_int+1) = gskern(bdry1,int_chnkr) - gphikern(bdry1,int_chnkr);
-lhs(1:N_int,N_int+2) = gskern(bdry2,int_chnkr) - gphikern(bdry2,int_chnkr);
+lhs(1:N_int,N_int+1) = 1/2*gskern(bdry1,int_chnkr) + gamma*gphikern(bdry1,int_chnkr);
+lhs(1:N_int,N_int+2) = 1/2*gskern(bdry2,int_chnkr) + gamma*gphikern(bdry2,int_chnkr);
 
 [~,gradgs] = gskern(int_chnkr,bdry1);
 [~,gradgphi] = gphikern(int_chnkr,bdry1);
 gradgs = gradgs(:,:,1);
 gradgphi = gradgphi(:,:,1);
-lhs(N_int+1,1:N_int) = -beta*gradgs.*int_chnkr.wts(:).'-gamma*gradgphi.*int_chnkr.wts(:).' ;
-lhs(N_int+1,N_int+1) = -1/2;
-
+lhs(N_int+1,1:N_int) = beta/2*gradgs.*int_chnkr.wts(:).'+gamma*gradgphi.*int_chnkr.wts(:).' ;
+lhs(N_int+1,N_int+1) = 1/alpha;
 [~,grad] = gskern(bdry2,bdry1);
 grad = grad(:,:,1);
 lhs(N_int+1,N_int+2) = grad;
@@ -117,8 +113,8 @@ lhs(N_int+1,N_int+2) = grad;
 [~,gradgphi] = gphikern(int_chnkr,bdry2);
 gradgs = gradgs(:,:,1);
 gradgphi = gradgphi(:,:,1);
-lhs(N_int+2,1:N_int) = -beta*gradgs.*int_chnkr.wts(:).'-gamma*gradgphi.*int_chnkr.wts(:).' ;
-lhs(N_int+2,N_int+2) = 1/2;
+lhs(N_int+2,1:N_int) = beta/2*gradgs.*int_chnkr.wts(:).'+gamma*gradgphi.*int_chnkr.wts(:).' ;
+lhs(N_int+2,N_int+2) = -1/alpha;
 
 [~,grad] = gskern(bdry1,bdry2);
 grad = grad(:,:,1);
@@ -132,7 +128,7 @@ grad3 = grad3(:,:,1);
 
 wts = left_chnkr.wts;
 
-rhs = [- Gs_tot(N_left+1:N_left+N_int,1:N_left)*f + Gphi_tot(N_left+1:N_left+N_int,1:N_left)*f ; -grad2*(f.*wts(:)); -grad3*(f.*wts(:))]; 
+rhs = [1/2*Gs_tot(N_left+1:N_left+N_int,1:N_left)*f + gamma*Gphi_tot(N_left+1:N_left+N_int,1:N_left)*f; grad2*(f.*wts(:)); grad3*(f.*wts(:))]; 
 
 mu = lhs \ rhs;
 mu1 = mu(end-1);
@@ -146,12 +142,12 @@ plot(int_chnkr.r(1,:),real(mu),int_chnkr.r(1,:),imag(mu))
 title('\mu (interior density)')
 
 mu = [zeros(N_left,1); mu; zeros(N_right,1) ];
-usol = mu - beta*Gs_tot*mu - gamma*Gphi_tot*mu + Gs_tot(:,1:N_left)*f+ mu1*gskern(bdry1,tot_chnkr) + mu2*gskern(bdry2,tot_chnkr);
+usol = mu + beta/2*Gs_tot*mu + gamma*Gphi_tot*mu - Gs_tot(:,1:N_left)*f+ mu1*gskern(bdry1,tot_chnkr) + mu2*gskern(bdry2,tot_chnkr);
 
 opts = [];
 opts.sing = 'log';
 
-Susol = delGphi_tot*mu + Gphi_tot(:,1:N_left)*f+ mu1*gphikern(bdry1,tot_chnkr) + mu2*gphikern(bdry2,tot_chnkr);
+Susol = -alpha/2*delGphi_tot*mu - Gphi_tot(:,1:N_left)*f+ mu1*gphikern(bdry1,tot_chnkr) + mu2*gphikern(bdry2,tot_chnkr);
 
 figure(17)
 plot(tot_chnkr.r(1,:),real(usol),tot_chnkr.r(1,:),imag(usol))
@@ -166,7 +162,7 @@ dd = squeeze(left_chnkr.d(1,:,:));
 dudx = dmat*u./dd;
 d2udx2 = dmat*dudx./dd;
 
-left_err = d2udx2(:)+beta*u(:)+gamma*Susol(1:N_left) - f;
+left_err = 0.5*(alpha*d2udx2(:)+beta*u(:))+gamma*Susol(1:N_left) - f;
 left_err = left_err ./ max(abs(uleft));
 
 % figure(18)
@@ -174,7 +170,7 @@ left_err = left_err ./ max(abs(uleft));
 % title('Left error (Lu - f)')
 
 uint = usol(N_left+1:N_left+N_int);
-int_err = uint - Susol(N_left+1:N_left+N_int);
+int_err = 1/2*uint + gamma*Susol(N_left+1:N_left+N_int);
 int_err = int_err ./ max(abs(uint));
 
 % figure(20);
@@ -187,7 +183,7 @@ dd = squeeze(right_chnkr.d(1,:,:));
 dudx = dmat*u./dd;
 d2udx2 = dmat*dudx./dd;
 
-right_err = d2udx2(:)+beta*u(:)+gamma*Susol(N_left+N_int+1:end);
+right_err = 0.5*(alpha*d2udx2(:)+beta*u(:))+gamma*Susol(N_left+N_int+1:end);
 right_err = right_err ./ max(abs(uright));
 
 % figure(21)
@@ -218,16 +214,25 @@ hold on
 
 % check that the BC is satisfied by the solution
 
+uleft = usol(1:N_left);
+u = squeeze(reshape(uleft,size(left_chnkr.r(1,:,:))));
 u1 = u(:,end);
 ds = left_chnkr.d(1,:,end).';
 [~,~,v2c] = lege.exps(16);
 [pols,~] = lege.pols(1,15);
-dudn = pols.'*v2c*dmat*(u1./ds);
+dudn1 = pols.'*v2c*dmat*(u1./ds);
 
 % figure(15);
 % mu_err = mu - mu_true;
 % plot(int_chnkr.r(1,:),real(mu_err),int_chnkr.r(1,:),imag(mu_err))
 
+uright = usol(end-N_right+1:end);
+u = squeeze(reshape(uright,size(right_chnkr.r(1,:,:))));
+u1 = u(:,1);
+ds = left_chnkr.d(1,:,end).';
+[~,~,v2c] = lege.exps(16);
+[pols,~] = lege.pols(-1,15);
+dudn2 = pols.'*v2c*dmat*(u1./ds);
 
 
 function hess = delphikern(rts,ejs,s,t)

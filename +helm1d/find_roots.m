@@ -1,7 +1,7 @@
-function [rts,ejs] = find_roots(beta,gamma)
+function [rts,ejs] = find_roots(alpha,beta,gamma)
 %%%%%
 %
-% Finds roots of polynomial -z^3 + beta*z + gamma = 0
+% Finds roots of polynomial z^3 - beta*z - gamma = 0
 % 
 % Returns:
 % - rts: vector of roots of polynomial
@@ -9,8 +9,8 @@ function [rts,ejs] = find_roots(beta,gamma)
 %
 %%%%%
 
-    d1 = - beta;
-    d0 = - gamma;
+    d1 = - beta./alpha;
+    d0 = - gamma./alpha;
     
     fp = @(z) 3*z.^2 + d1;
     
@@ -19,7 +19,8 @@ function [rts,ejs] = find_roots(beta,gamma)
     rts1 = eig(C);
     rts = bring_refine_rts(rts1,d1,d0);
     
-    ejs = -1./fp(rts); % partial fraction coefficients for 1/f
+    ejs = 2./fp(rts); % partial fraction coefficients for 1/f
+    ejs = ejs./alpha;
 
 end
 

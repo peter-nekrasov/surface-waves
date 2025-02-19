@@ -33,24 +33,24 @@ title('f (RHS)')
 targ = [];
 targ.r = [-L; 0];
 
-[val,grad] = helm1d.green(k,chnkr,targ);
-grad = grad(:,:,1);
+[val,grad] = chnk.helm1d.green(k,chnkr.r,targ.r);
+grad = 1i*grad(:,:,1)./(2*k);
+val = 1i*val(:,:,1)./(2*k);
 
 wts = chnkr.wts(:);
 
 mu1 = 2*grad*(f.*wts(:));
-mu1 = 0;
 
 % evaluation
 
-gkern =  @(s,t) helm1d.green(k,s,t); 
+gkern =  @(s,t) 1i*chnk.helm1d.green(k,s.r,t.r)./(2*k); 
 
 opts = [];
 opts.sing = 'removable';
 
 G = chunkermat(chnkr,gkern,opts);
 
-usol = G*f + mu1*val.';
+usol = -G*f + mu1*val.';
 
 figure(3)
 plot(chnkr.r(1,:),real(usol),chnkr.r(1,:),imag(usol))
@@ -71,7 +71,7 @@ figure(4)
 plot(rs,real(f_recon),rs,imag(f_recon))
 title('Lu (= f)')
 
-err = (f_recon(:) - f(:))/max(f(:)).*wts(:).^2;
+err = (f_recon(:) - f(:))/max(f(:)).*sqrt(wts(:));
 
 figure(5)
 plot(rs,real(err),rs,imag(err))

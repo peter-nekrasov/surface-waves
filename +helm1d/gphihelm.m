@@ -24,25 +24,25 @@ for i = 1:3
     rhoj = rts(i);
     ej = ejs(i);
 
-    val = val + 1/(2*pi)*ej*(helm1d.expeval(1i*rhoj*rx)+helm1d.expeval(-1i*rhoj*rx));
-    grad = grad + 1i*sign(rx)/(2*pi)*ej*rhoj.*(helm1d.expeval(1i*rhoj*abs(rx))-helm1d.expeval(-1i*rhoj*abs(rx)));
-    hess = hess - 1/(2*pi)*ej*rhoj^2.*(helm1d.expeval(1i*rhoj*abs(rx))+helm1d.expeval(-1i*rhoj*abs(rx)));
+    val = val + 1/(4*pi)*ej*(helm1d.expeval(1i*rhoj*rx)+helm1d.expeval(-1i*rhoj*rx));
+    grad = grad + 1i*sign(rx)/(4*pi)*ej*rhoj.*(helm1d.expeval(1i*rhoj*abs(rx))-helm1d.expeval(-1i*rhoj*abs(rx)));
+    hess = hess - 1/(4*pi)*ej*rhoj^2.*(helm1d.expeval(1i*rhoj*abs(rx))+helm1d.expeval(-1i*rhoj*abs(rx)));
 
     if (angle(rhoj) < pi/2) && (angle(rhoj) >= 0) && (rhoj ~= 0)
         
-        val = val + 1i*ej*exp(1i*rhoj*abs(rx));
-        grad = grad - ej*rhoj*sign(rx).*exp(1i*rhoj*abs(rx));    
-        hess = hess - 1i*ej*rhoj^2*exp(1i*rhoj*abs(rx));
+        val = val + 1i*ej*exp(1i*rhoj*abs(rx))/2;
+        grad = grad - ej*rhoj*sign(rx).*exp(1i*rhoj*abs(rx))/2;    
+        hess = hess - 1i*ej*rhoj^2*exp(1i*rhoj*abs(rx))/2;
 
     elseif (angle(rhoj) > -pi/2) && (angle(rhoj) < 0) && (rhoj ~= 0)
 
-        val = val + 1i*ej*exp(-1i*rhoj*abs(rx));
-        grad = grad + ej*rhoj*sign(rx).*exp(-1i*rhoj*abs(rx));
-        hess = hess + 1i*ej*rhoj^2*exp(-1i*rhoj*abs(rx));
+        val = val + 1i*ej*exp(-1i*rhoj*abs(rx))/2;
+        grad = grad + ej*rhoj*sign(rx).*exp(-1i*rhoj*abs(rx))/2;
+        hess = hess + 1i*ej*rhoj^2*exp(-1i*rhoj*abs(rx))/2;
 
     end
 
-    val(rx == 0) = val(rx == 0) - ej.*(log(1i*rhoj)+log(-1i*rhoj))/(2*pi); 
+    val(rx == 0) = val(rx == 0) - ej.*(log(1i*rhoj)+log(-1i*rhoj))/(4*pi); 
 
 end
 

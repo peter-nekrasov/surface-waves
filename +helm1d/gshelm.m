@@ -47,6 +47,7 @@ for i = 1:3
 end
 
 grad(rx == 0) = 0;
+hess(rx == 0) = 0;
 
 
 end
