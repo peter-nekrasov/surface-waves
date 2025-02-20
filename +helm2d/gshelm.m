@@ -41,7 +41,7 @@ r2 = dx2 + dy2;
 r = sqrt(r2);
 
 val = 0;
-phi = 0;
+% phi = 0;
 gradx = 0;
 grady = 0;
 hessxx = 0;
@@ -109,7 +109,7 @@ for i = 1:3
        % sk0lapy = gradlapsk0(:,:,2);
 
        val = val + ej*rhoj^2*(-sk0 + 2i*h0);
-       phi = phi + ej*rhoj*(-sk0 + 2i*h0);
+       % phi = phi + ej*rhoj*(-sk0 + 2i*h0);
 
        gradx = gradx + ej*rhoj^2*(-sk0x + 2i*h0x);
        grady = grady + ej*rhoj^2*(-sk0y + 2i*h0y);
@@ -136,7 +136,7 @@ for i = 1:3
        % sk0lapy = gradlapsk0(:,:,2);
 
        val = val + ej*rhoj^2*sk0;
-       phi = phi + ej*rhoj*sk0;
+       % phi = phi + ej*rhoj*sk0;
 
        gradx = gradx + ej*rhoj^2*sk0x;
        grady = grady + ej*rhoj^2*sk0y;
@@ -153,7 +153,7 @@ for i = 1:3
 end
 
 val = 1/2*val;
-phi = 1/2*phi;
+% phi = 1/2*phi;
 gradx = 1/2*gradx;
 grady = 1/2*grady;
 hessxx = 1/2*hessxx;
