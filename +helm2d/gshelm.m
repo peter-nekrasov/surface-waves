@@ -83,20 +83,20 @@ for i = 1:3
        h0xy = -4i*h0xy;
        h0yy = -4i*h0yy;
 
-       h0xxx = thirdh0(:,:,1);
-       h0yxx = thirdh0(:,:,2);
-       h0xyy = thirdh0(:,:,3);
-       h0yyy = thirdh0(:,:,4);
+       % h0xxx = thirdh0(:,:,1);
+       % h0yxx = thirdh0(:,:,2);
+       % h0xyy = thirdh0(:,:,3);
+       % h0yyy = thirdh0(:,:,4);
 
-       h0xxx(r == 0) = 0;
-       h0yxx(r == 0) = 0;
-       h0xyy(r == 0) = 0;
-       h0yyy(r == 0) = 0;
+       % h0xxx(r == 0) = 0;
+       % h0yxx(r == 0) = 0;
+       % h0xyy(r == 0) = 0;
+       % h0yyy(r == 0) = 0;
 
-       h0xxx = -4i*h0xxx;
-       h0yxx = -4i*h0yxx;
-       h0xyy = -4i*h0xyy;
-       h0yyy = -4i*h0yyy;
+       % h0xxx = -4i*h0xxx;
+       % h0yxx = -4i*h0yxx;
+       % h0xyy = -4i*h0xyy;
+       % h0yyy = -4i*h0yyy;
        
        sk0x = gradsk0(:,:,1);
        sk0y = gradsk0(:,:,2);

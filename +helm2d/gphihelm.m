@@ -60,9 +60,9 @@ for i = 1:3
        [sk0] = helm2d.struveK(rhoj,src,targ);
        [h0] = chnk.helm2d.green(rhoj,src,targ);
 
-       % h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
-       % 
-       % h0 = -4i*h0;
+       h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
+
+       h0 = -4i*h0;
        % gradh0 = -4i*gradh0;
        % 
        % h0x = gradh0(:,:,1);
@@ -153,7 +153,7 @@ for i = 1:3
 end
 
 % val = 1/2*val;
-phi = 1/2*phi;
+phi = 1/4*phi;
 % gradx = 1/2*gradx;
 % grady = 1/2*grady;
 % hessxx = 1/2*hessxx;
