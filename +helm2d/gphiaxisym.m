@@ -22,7 +22,7 @@ function [val,grad,hess] = gphiaxisym(rts,ejs,n,src,targ)
 rhop = repmat(src.r(1,:),nt,1);
 
 val = integral(@(t) exp(1i*n*t).*get_val(rts,ejs,src,targ,t),0,2*pi,'ArrayValued',true);
-val = val.*rhop/2;
+val = val.*rhop;
 
 grad = 0;
 hess = 0;

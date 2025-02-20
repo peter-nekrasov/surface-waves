@@ -1,4 +1,4 @@
-function [phi] = gphihelm(rts,ejs,src,targ)
+function [phi,gradphi,hessphi] = gphihelm(rts,ejs,src,targ)
 %
 % computes the composition of S with the green's function for the 
 % integro-differential equation determined by the polynomial:
@@ -18,6 +18,9 @@ function [phi] = gphihelm(rts,ejs,src,targ)
 % rts - roots of cubic polynomial
 % ejs - residues (see notes)
 %
+
+h = 0.01;
+d1 = [1/280	-4/105	1/5	-4/5	0	4/5	-1/5	4/105	-1/280]/h;
 
 src = src.r;
 targ = targ.r;
@@ -42,6 +45,12 @@ r = sqrt(r2);
 
 % val = 0;
 phi = 0;
+gradphix = 0;
+gradphiy = 0;
+hessphixx = 0;
+hessphixy = 0;
+hessphiyy = 0;
+
 % gradx = 0;
 % grady = 0;
 % hessxx = 0;
@@ -57,32 +66,32 @@ for i = 1:3
 
     if (angle(rhoj) == 0) && (rhoj ~= 0)
 
-       [sk0] = helm2d.struveK(rhoj,src,targ);
-       [h0] = chnk.helm2d.green(rhoj,src,targ);
+       [sk0,gradsk0,hesssk0] = helm2d.struveK(rhoj,src,targ);
+       [h0,gradh0,hessh0] = chnk.helm2d.green(rhoj,src,targ);
 
        h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
 
        h0 = -4i*h0;
-       % gradh0 = -4i*gradh0;
-       % 
-       % h0x = gradh0(:,:,1);
-       % h0y = gradh0(:,:,2);
-       % 
-       % h0x(r == 0) = 0;
-       % h0y(r == 0) = 0;
-       % 
-       % h0xx = hessh0(:,:,1);
-       % h0xy = hessh0(:,:,2);
-       % h0yy = hessh0(:,:,3);
-       % 
-       % h0xx(r == 0) = rhoj^2/(4*pi)*(log(rhoj)-1i*pi/2+eulergamma-0.5-log(2));
-       % h0xy(r == 0) = 0;
-       % h0yy(r == 0) = rhoj^2/(4*pi)*(log(rhoj)-1i*pi/2+eulergamma-0.5-log(2));
-       % 
-       % h0xx = -4i*h0xx;
-       % h0xy = -4i*h0xy;
-       % h0yy = -4i*h0yy;
-       % 
+       gradh0 = -4i*gradh0;
+       
+       h0x = gradh0(:,:,1);
+       h0y = gradh0(:,:,2);
+       
+       h0x(r == 0) = 0;
+       h0y(r == 0) = 0;
+
+       h0xx = hessh0(:,:,1);
+       h0xy = hessh0(:,:,2);
+       h0yy = hessh0(:,:,3);
+
+       h0xx(r == 0) = rhoj^2/(4*pi)*(log(rhoj)-1i*pi/2+eulergamma-0.5-log(2));
+       h0xy(r == 0) = 0;
+       h0yy(r == 0) = rhoj^2/(4*pi)*(log(rhoj)-1i*pi/2+eulergamma-0.5-log(2));
+
+       h0xx = -4i*h0xx;
+       h0xy = -4i*h0xy;
+       h0yy = -4i*h0yy;
+
        % h0xxx = thirdh0(:,:,1);
        % h0yxx = thirdh0(:,:,2);
        % h0xyy = thirdh0(:,:,3);
@@ -97,54 +106,55 @@ for i = 1:3
        % h0yxx = -4i*h0yxx;
        % h0xyy = -4i*h0xyy;
        % h0yyy = -4i*h0yyy;
-       % 
-       % sk0x = gradsk0(:,:,1);
-       % sk0y = gradsk0(:,:,2);
-       % 
-       % sk0xx = hesssk0(:,:,1);
-       % sk0xy = hesssk0(:,:,2);
-       % sk0yy = hesssk0(:,:,3);
-       % 
+       
+       sk0x = gradsk0(:,:,1);
+       sk0y = gradsk0(:,:,2);
+
+       sk0xx = hesssk0(:,:,1);
+       sk0xy = hesssk0(:,:,2);
+       sk0yy = hesssk0(:,:,3);
+       
        % sk0lapx = gradlapsk0(:,:,1);
        % sk0lapy = gradlapsk0(:,:,2);
        % 
        % val = val + ej*rhoj^2*(-sk0 + 2i*h0);
        phi = phi + ej*rhoj*(-sk0 + 2i*h0);
 
-       % gradx = gradx + ej*rhoj^2*(-sk0x + 2i*h0x);
-       % grady = grady + ej*rhoj^2*(-sk0y + 2i*h0y);
-       % 
-       % hessxx = hessxx + ej*rhoj^2*(-sk0xx + 2i*h0xx);
-       % hessxy = hessxy + ej*rhoj^2*(-sk0xy + 2i*h0xy);
-       % hessyy = hessyy + ej*rhoj^2*(-sk0yy + 2i*h0yy);
-       % 
+       gradphix = gradphix + ej*rhoj*(-sk0x + 2i*h0x);
+       gradphiy = gradphiy + ej*rhoj*(-sk0y + 2i*h0y);
+
+       hessphixx = hessphixx + ej*rhoj*(-sk0xx + 2i*h0xx);
+       hessphixy = hessphixy + ej*rhoj*(-sk0xy + 2i*h0xy);
+       hessphiyy = hessphiyy + ej*rhoj*(-sk0yy + 2i*h0yy);
+       
        % gradlapx = gradlapx + ej*rhoj^2*(-sk0lapx + 2i*(h0xxx+h0xyy));
        % gradlapy = gradlapy + ej*rhoj^2*(-sk0lapy + 2i*(h0yxx+h0yyy));
 
     elseif rhoj ~= 0
 
-       [sk0] = helm2d.struveK(-rhoj,src,targ);
+       [sk0,gradsk0,hesssk0] = helm2d.struveK(-rhoj,src,targ);
 
-       % sk0x = gradsk0(:,:,1);
-       % sk0y = gradsk0(:,:,2);
-       % 
-       % sk0xx = hesssk0(:,:,1);
-       % sk0xy = hesssk0(:,:,2);
-       % sk0yy = hesssk0(:,:,3);
-       % 
+       sk0x = gradsk0(:,:,1);
+       sk0y = gradsk0(:,:,2);
+
+       sk0xx = hesssk0(:,:,1);
+       sk0xy = hesssk0(:,:,2);
+       sk0yy = hesssk0(:,:,3);
+       
        % sk0lapx = gradlapsk0(:,:,1);
        % sk0lapy = gradlapsk0(:,:,2);
        % 
        % val = val + ej*rhoj^2*sk0;
+
        phi = phi + ej*rhoj*sk0;
-       % 
-       % gradx = gradx + ej*rhoj^2*sk0x;
-       % grady = grady + ej*rhoj^2*sk0y;
-       % 
-       % hessxx = hessxx + ej*rhoj^2*sk0xx;
-       % hessxy = hessxy + ej*rhoj^2*sk0xy;
-       % hessyy = hessyy + ej*rhoj^2*sk0yy;
-       % 
+        
+       gradphix = gradphix + ej*rhoj*sk0x;
+       gradphiy = gradphiy + ej*rhoj*sk0y;
+       
+       hessphixx = hessphixx + ej*rhoj*sk0xx;
+       hessphixy = hessphixy + ej*rhoj*sk0xy;
+       hessphiyy = hessphiyy + ej*rhoj*sk0yy;
+       
        % gradlapx = gradlapx + ej*rhoj^2*sk0lapx;
        % gradlapy = gradlapy + ej*rhoj^2*sk0lapy;
 
@@ -154,16 +164,16 @@ end
 
 % val = 1/2*val;
 phi = 1/4*phi;
-% gradx = 1/2*gradx;
-% grady = 1/2*grady;
-% hessxx = 1/2*hessxx;
-% hessxy = 1/2*hessxy;
-% hessyy = 1/2*hessyy;
+gradphix = 1/4*gradphix;
+gradphiy = 1/4*gradphiy;
+hessphixx = 1/4*hessphixx;
+hessphixy = 1/4*hessphixy;
+hessphiyy = 1/4*hessphiyy;
 % gradlapx = 1/2*gradlapx;
 % gradlapy = 1/2*gradlapy;
 
-% grad = cat(3,gradx,grady);
-% hess = cat(3,hessxx,hessxy,hessyy);
+gradphi = cat(3,gradphix,gradphiy);
+hessphi = cat(3,hessphixx,hessphixy,hessphiyy);
 % gradlap = cat(3,gradlapx,gradlapy);
 
 end

@@ -1,4 +1,4 @@
-function [val,grad,hess] = gsaxisym(rts,ejs,n,src,targ)
+function [val,grad] = gsaxisym(rts,ejs,n,src,targ)
 %
 % computes the green's function for the integro-differential equation 
 % determined by the polynomial:
@@ -22,17 +22,30 @@ function [val,grad,hess] = gsaxisym(rts,ejs,n,src,targ)
 rhop = repmat(src.r(1,:),nt,1);
 
 val = integral(@(t) exp(1i*n*t).*get_val(rts,ejs,src,targ,t),0,2*pi,'ArrayValued',true);
-val = val.*rhop/2;
+val = val.*rhop;
 
-grad = 0;
-hess = 0;
+if nargout > 1
+
+    grad = integral(@(t) exp(1i*n*t).*get_grad(rts,ejs,src,targ,t),0,2*pi,'ArrayValued',true);
+    grad = grad.*rhop;
 
 end
+
+end
+
 
 function val = get_val(rts,ejs,src,targ,theta)
 
     targ.r = [targ.r(1,:)*cos(theta); targ.r(1,:)*sin(theta)];
     val = helm2d.gshelm(rts,ejs,src,targ);
+
+end
+
+function grad = get_grad(rts,ejs,src,targ,theta)
+
+    targ.r = [targ.r(1,:)*cos(theta); targ.r(1,:)*sin(theta)];
+    [~,grad] = helm2d.gshelm(rts,ejs,src,targ);
+    grad = grad(:,:,1)*cos(theta) + grad(:,:,2)*sin(theta);
 
 end
 

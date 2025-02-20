@@ -87,8 +87,8 @@ if ilow
 end
 
 if nargout > 1
-cr0x = -rhoj*dx./r.*cr1;
-cr0y = -rhoj*dy./r.*cr1;
+cr0x = 2i*rhoj*dx./(pi*r) - rhoj*dx./r.*cr1;
+cr0y = 2i*rhoj*dy./(pi*r) - rhoj*dy./r.*cr1;
 
 gradx = -1i*cr0x+1i*h0x;
 grady = -1i*cr0y+1i*h0y;
@@ -108,9 +108,9 @@ end
 if nargout > 2
 cr1x = rhoj*dx./r.*cr0 - dx./r2.*cr1;
 cr1y = rhoj*dy./r.*cr0 - dy./r2.*cr1;
-cr0xx = -rhoj*dy2./r3.*cr1 - rhoj*dx./r.*cr1x;
-cr0xy = rhoj*dx.*dy./r3.*cr1 - rhoj*dx./r.*cr1y;
-cr0yy = -rhoj*dx2./r3.*cr1 - rhoj*dy./r.*cr1y;
+cr0xx = 2i*rhoj*dy2./(pi*r3) - rhoj*dy2./r3.*cr1 - rhoj*dx./r.*cr1x;
+cr0xy = -2i*rhoj*dx.*dy./(pi*r3) + rhoj*dx.*dy./r3.*cr1 - rhoj*dx./r.*cr1y;
+cr0yy = 2i*rhoj*dx2./(pi*r3) - rhoj*dx2./r3.*cr1 - rhoj*dy./r.*cr1y;
 
 hessxx = -1i*cr0xx+1i*h0xx;
 hessxy = -1i*cr0xy+1i*h0xy;

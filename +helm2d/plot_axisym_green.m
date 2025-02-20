@@ -16,40 +16,37 @@ src.r = [8;0];
 targ = [];
 targ.r = [0:0.1:20; (0:0.1:20)*0];
 
-[val,~] = helm2d.gsaxisym(rts,ejs,n,src,targ);
+[valgs,gradgs] = helm2d.gsaxisym(rts,ejs,n,src,targ);
 
 figure(1)
 tiledlayout(1,3);
 nexttile
-plot(targ.r(1,:),real(val),targ.r(1,:),imag(val))
+plot(targ.r(1,:),real(valgs),targ.r(1,:),imag(valgs))
 title('G_S (nonlocal Helmholtz)')
 
 
-[val] = helm2d.gphiaxisym(rts,ejs,n,src,targ);
+[valgphi] = helm2d.gphiaxisym(rts,ejs,n,src,targ);
 
 nexttile
-plot(targ.r(1,:),real(val),targ.r(1,:),imag(val))
+plot(targ.r(1,:),real(valgphi),targ.r(1,:),imag(valgphi))
 title('G_\phi (or S[G_S])')
 
-return
-
-[val] = chnk.axissymhelm2d.green(k,src.r,targ.r,[0;0]);
-
-nexttile
-plot(targ.r(1,:),real(val),targ.r(1,:),imag(val))
-title('G (Helmholtz)')
+% 
+% [val] = chnk.axissymhelm2d.green(k,src.r,targ.r,[0;0]);
+% 
+% nexttile
+% plot(targ.r(1,:),real(val),targ.r(1,:),imag(val))
+% title('G (Helmholtz)')
 
 %%
-
-[~,grad] = helm2d.gshelm(rts,ejs,src,targ);
-grad = grad(:,:,1);
 
 figure(2)
 tiledlayout(1,3);
 nexttile
-plot(targ.r(1,:),real(grad),targ.r(1,:),imag(grad))
+plot(targ.r(1,:),real(gradgs),targ.r(1,:),imag(gradgs))
 title('\nabla G_S (nonlocal Helmholtz)')
 
+return
 
 % [~,grad] = helm2d.gphihelm(rts,ejs,src,targ);
 % 
