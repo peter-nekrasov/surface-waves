@@ -1,70 +1,77 @@
-%% Using trapezoid rule to integrate the axisymmetric G against some rhs f
-% adaptive integration too slow :(
+%% Integrating the axisymmetric G against some rhs f
+close all
 
-h = 0.01;
-rs = 8:h:(8+8*h);
-center = 8+4*h;
-targ = [];
-targ.r = [rs; 0*rs];
+n = 2; % mode number
 
 alpha = 0.5;
-beta = 1.5;
-gamma = 2.5;
-
-n = 2;
-
+beta = 1+0.2i;
+gamma = 2;
 [rts,ejs] = helm2d.find_roots(alpha,beta,gamma);
+k = rts(abs(angle(rts)) == min(abs(angle(rts))));
 
-f0 = f(center);
 
-src = []; src.r = [0:h:20; 0*(0:h:20)];
+% create domains in chunkie 
+cparams = [];
+cparams.ifclosed = false;
+cparams.maxchunklen = 8 / abs(k);
+cparams.ta = 0;
+cparams.tb = 20; 
 
-gsmat = helm2d.gsaxisym(rts,ejs,n,src,targ);
+fcurve = @(t) [t(:).'; 0*t(:).'];
 
-rhs = f(0:h:20).';
-usol = -gsmat*rhs.*h;
+cparams.maxchunklen = 8 / abs(k);
+chnkr = chunkerfunc(fcurve,cparams);
+chnkr = sort(chnkr);
 
-targ = []; targ.r = [center; 0];
-gphimat = helm2d.gphiaxisym(rts,ejs,n,src,targ);
-Susol = -gphimat*rhs.*h;
+figure(1)
+plot(chnkr,'.')
+hold on 
+
+s = 1;
+f = exp(-(chnkr.r(1,:)-10).^2/(2*s^2));
+f = f.';
+
+figure(2)
+plot(chnkr.r(1,:), f)
+title('f (RHS)')
+
+gskern =  @(s,t) helm2d.gsaxisym(rts,ejs,n,s,t); 
+gphikern =  @(s,t) helm2d.gphiaxisym(rts,ejs,n,s,t); 
+
+opts = [];
+opts.sing = 'removable';
+
+Gs = chunkermat(chnkr,gskern,opts);
+Gphi = chunkermat(chnkr,gphikern,opts);
 
 %%
 
-% finite difference stencils
-d1 = [1/280	-4/105	1/5	-4/5	0	4/5	-1/5	4/105	-1/280]/h;
+usol = - Gs*f;
+Susol = - Gphi*f;
 
-d2 = zeros(1, 9);
-d2(1) = -1/560;
-d2(2) = 8/315;
-d2(3) = -1/5;
-d2(4) = 8/5;
-d2(5) = -205/72;
-d2(6) = 8/5;
-d2(7) = -1/5;
-d2(8) = 8/315;
-d2(9) = -1/560;
-d2 = d2 / h^2;
+figure(17)
+plot(chnkr.r(1,:),real(usol),chnkr.r(1,:),imag(usol))
+title('u (solution)')
 
-f0
-f1 = alpha/2*d2*usol + alpha/2/rs(5)*d1*usol - alpha/2*n^2/rs(5)^2*usol(5) + beta/2*usol(5) + gamma*Susol 
+% checking the solution
 
-err = f0 - f1 %  
+dmat = lege.dermat(16);
+u = squeeze(reshape(usol,size(chnkr.r(1,:,:))));
+dd = squeeze(chnkr.d(1,:,:));
+dudx = dmat*u./dd;
+d2udx2 = dmat*dudx./dd;
 
-function val = integrand(rts,ejs,n,targ,rhop)
-    src = [];
-    src.r = [rhop; 0];
-    gs = helm2d.gsaxisym(rts,ejs,n,src,targ);
-    val = -gs.*f(rhop);
-end
+rs = chnkr.r(1,:);
+f1 = alpha/2*d2udx2(:) + alpha/2./rs(:).*dudx(:) - alpha/2*n^2./rs(:).^2.*usol + beta/2*usol + gamma*Susol;
 
-function val = integrand2(rts,ejs,targ,rhop)
-    src = [];
-    src.r = [rhop; 0];
-    gphi = helm2d.gphihelm(rts,ejs,n,src,targ);
-    val = -gphi.*f(rhop);
-end
+figure(21)
+plot(chnkr.r(1,:),real(f1))
+title('Reconstructed f')
 
-function val = f(r)
-    val = exp(-((r-10).^2)/2);
-end
+tot_err = abs(f1 - f);
 
+figure(22)
+plot(chnkr.r(1,:),log10(tot_err))
+title('Residual (interior and exterior)')
+ylabel('log_{10} error')
+hold on

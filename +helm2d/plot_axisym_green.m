@@ -8,7 +8,7 @@ gamma = 2.5;
 [rts,ejs] = helm2d.find_roots(alpha,beta,gamma);
 k = rts(abs(angle(rts)) == min(abs(angle(rts))));
 
-n = 2;
+n = 0;
 
 src = [];
 src.r = [8;0];

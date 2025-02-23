@@ -40,7 +40,7 @@ eintw = cos(n*xlegs).*wlegs;
 
 val = reshape(val.',[nt*ns ntheta]);
 val = 2*val*eintw;
-val = reshape(val,[nt ns]);
+val = reshape(val,[ns nt]).';
 val = val.*rhop;
 
 if nargout > 1
