@@ -1,4 +1,4 @@
-function [val,grad,hess] = gphiaxisym(rts,ejs,n,src,targ)
+function [val,grad,lap] = gphiaxisym(rts,ejs,n,src,targ)
 %
 % computes the green's function for the integro-differential equation 
 % determined by the polynomial:
@@ -18,22 +18,47 @@ function [val,grad,hess] = gphiaxisym(rts,ejs,n,src,targ)
 % rts - roots of cubic polynomial
 % ejs - residues (see notes)
 
+
+[~,ns] = size(src.r);
 [~,nt] = size(targ.r);
+
 rhop = repmat(src.r(1,:),nt,1);
 
-val = integral(@(t) exp(1i*n*t).*get_val(rts,ejs,src,targ,t),0,2*pi,'ArrayValued',true);
+[xlegs,wlegs] = helm2d.get_grid();
+
+ntheta = numel(xlegs);
+
+tarx = targ.r(1,:).'*cos(xlegs).';
+tary = targ.r(1,:).'*sin(xlegs).';
+thetas = ones(nt,1)*xlegs.';
+
+tar.r = [tarx(:) tary(:)].';
+
+[val,grad,hess] = helm2d.gphihelm(rts,ejs,src,tar);
+
+eintw = cos(n*xlegs).*wlegs;
+
+val = reshape(val.',[nt*ns ntheta]);
+val = 2*val*eintw;
+val = reshape(val,[nt ns]);
 val = val.*rhop;
 
-grad = 0;
-hess = 0;
+if nargout > 1
+
+    grad = grad(:,:,1).*cos(thetas(:))+grad(:,:,2).*sin(thetas(:));
+    grad = reshape(grad.',[nt*ns ntheta]);
+    grad = 2*grad*eintw;
+    grad = reshape(grad,[nt ns]);
+    grad = grad.*rhop;
+
+end
+if nargout > 2
+
+    lap = reshape(hess(:,:,1).'+hess(:,:,3).',[nt*ns ntheta]);
+    lap = 2*lap*eintw;
+    lap = reshape(lap,[nt ns]);
+    lap = lap.*rhop;
 
 end
 
-function val = get_val(rts,ejs,src,targ,theta)
-
-    targ.r = [targ.r(1,:)*cos(theta); targ.r(1,:)*sin(theta)];
-    val = helm2d.gphihelm(rts,ejs,src,targ);
-
 end
-
-

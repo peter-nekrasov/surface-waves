@@ -16,7 +16,7 @@ targ.r = [xs; xs*0];
 
 [rts,ejs] = helm2d.find_roots(alpha,beta,gamma);
 
-gs = helm2d.gsaxisym(rts,ejs,n,src,targ);
+[gs,grad,hess] = helm2d.gsaxisym(rts,ejs,n,src,targ);
 
 targ.r = [xs(5); 0];
 gphi = helm2d.gphiaxisym(rts,ejs,n,src,targ);
