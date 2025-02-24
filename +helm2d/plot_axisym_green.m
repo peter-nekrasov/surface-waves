@@ -13,7 +13,7 @@ n = 0;
 src = [];
 src.r = [8;0];
 
-h = 0.05;
+h = 0.01;
 targ = [];
 targ.r = [0:h:20; 0*(0:h:20)];
 
@@ -52,7 +52,7 @@ title('\nabla G_S (nonlocal Helmholtz)')
 
 nexttile
 plot(targ.r(1,:),real(gradgphi),targ.r(1,:),imag(gradgphi))
-title('\nabla G (Helmholtz)')
+title('\nabla G_\phi')
 
 %%
 
@@ -65,4 +65,4 @@ title('\Delta G_S (nonlocal Helmholtz)')
 
 nexttile
 plot(targ.r(1,:),real(lapgphi),targ.r(1,:),imag(lapgphi))
-title('\Delta G (Helmholtz)')
+title('\Delta G_\phi')

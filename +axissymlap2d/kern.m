@@ -74,7 +74,7 @@ if strcmpi(type, 'sprime')
 end
 
 if strcmpi(type, 's')
-    submat = chnk.axissymlap2d.green(src, targ, origin);
+    submat = axissymlap2d.green(src, targ, origin);
     
 end
 

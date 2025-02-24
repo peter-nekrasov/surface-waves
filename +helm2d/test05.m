@@ -1,7 +1,7 @@
 %% Integrating the axisymmetric G against some rhs f
 close all
 
-n = 2; % mode number
+n = 0; % mode number
 
 alpha = 0.5;
 beta = 1+0.2i;
@@ -15,11 +15,10 @@ cparams = [];
 cparams.ifclosed = false;
 cparams.maxchunklen = 8 / abs(k);
 cparams.ta = 0;
-cparams.tb = 20; 
+cparams.tb = 70; 
 
 fcurve = @(t) [t(:).'; 0*t(:).'];
 
-cparams.maxchunklen = 8 / abs(k);
 chnkr = chunkerfunc(fcurve,cparams);
 chnkr = sort(chnkr);
 
@@ -28,7 +27,7 @@ plot(chnkr,'.')
 hold on 
 
 s = 1;
-f = exp(-(chnkr.r(1,:)-10).^2/(2*s^2));
+f = exp(-(chnkr.r(1,:)-30).^2/(2*s^2));
 f = f.';
 
 figure(2)

@@ -3,7 +3,7 @@ function [gval,gdz,gdr,gdrp] = gfunc_on_axis(r,rp,dr,z,zp,dz)
     n       = 3;
 
     t = (dz.^2+dr.^2)./(2.*r.*rp);
-    [q0,q1,q0d] = chnk.axissymlap2d.qleg_half(t);
+    [q0,q1,q0d] = axissymlap2d.qleg_half(t);
 
     gval = domega3*(rp./r).^((n-2)/2).*q0;
     gdz  =-domega3*(rp./r).^((n-2)/2).*q0d ...

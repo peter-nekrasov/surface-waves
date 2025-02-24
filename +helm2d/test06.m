@@ -8,10 +8,8 @@ gamma = 2.5;
 
 n = 0;
 
-src = [];
-src.r = [1 2 3;0 0 0];
-targ = [];
-targ.r = [5 6 7;0 0 0];
+targ.r = [10.0166;0];
+src.r = [10;0];
 
 [rts,ejs] = helm2d.find_roots(alpha,beta,gamma);
 [gs,grad,hess] = helm2d.gsaxisym(rts,ejs,n,src,targ);
