@@ -1,4 +1,4 @@
-function [gval,gdz,gdr,gdrp] = gfunc(r,rp,dr,z,zp,dz)
+function [gval,gdz,gdr,gdrp] = gfunc(r,rp,dr,z,zp,dz,n)
     domega3 = 2*pi;
     n       = 3;
     
@@ -29,4 +29,10 @@ function [gval,gdz,gdr,gdrp] = gfunc(r,rp,dr,z,zp,dz)
     gdr(st0) = 0;
     gdrp(st0) = gdrp0(st0);
     gdz(st0) = gdz0(st0);
+
+    if n == 0 
+        gval = domega3*(rp./r).^((n-2)/2).*q0;
+    elseif n == 1
+        gval = domega3*(rp./r).^((n-2)/2).*q1;
+    end
 end

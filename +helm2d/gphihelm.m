@@ -19,9 +19,6 @@ function [phi,gradphi,hessphi] = gphihelm(rts,ejs,src,targ)
 % ejs - residues (see notes)
 %
 
-h = 0.01;
-d1 = [1/280	-4/105	1/5	-4/5	0	4/5	-1/5	4/105	-1/280]/h;
-
 src = src.r;
 targ = targ.r;
 

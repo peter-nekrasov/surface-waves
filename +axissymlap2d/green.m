@@ -1,4 +1,4 @@
-function [val, grad] = green(src, targ, origin)
+function [val, grad] = green(n, src, targ, origin)
 %CHNK.AXISSYMHELM2D.GREEN evaluate the Laplace green's function
 % for the given sources and targets. 
 %
@@ -25,7 +25,7 @@ rp = (rs + origin(1));
 dr = (rs-rt);
 z  = zeros(size(rt));
 zp = zeros(size(rt));
-[g,gdz,gdr,gdrp] = axissymlap2d.gfunc(r,rp,dr,z,zp,dz);
+[g,gdz,gdr,gdrp] = axissymlap2d.gfunc(r,rp,dr,z,zp,dz,n);
 
 val = g;
 gtmp(:,:,1) = gdr;

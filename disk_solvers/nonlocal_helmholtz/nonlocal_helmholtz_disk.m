@@ -2,7 +2,7 @@ close all
 
 L = 10; % width of polynya
 
-n = 0; % mode number
+n = 1; % mode number (0 or 1)
 
 alpha = 0.5;
 beta = 1+0.2i;
@@ -48,7 +48,7 @@ bdry.r = [right_bd; 0];
 
 gskern =  @(s,t) helm2d.gsaxisym(rts,ejs,n,s,t); 
 gphikern =  @(s,t) helm2d.gphiaxisym(rts,ejs,n,s,t); 
-skern =  @(s,t) axissymlap2d.green(s.r,t.r,[0;0]); 
+skern =  @(s,t) axissymlap2d.green(n,s.r,t.r,[0;0]); 
 delgphikern = @(s,t) delphikern(rts,ejs,n,s,t);
 gradkern =  @(s,t) gradgskern(rts,ejs,n,s,t); 
 
@@ -121,7 +121,7 @@ bterm = gskern(bdry,ext_chnkr);
 bterm = bterm(1:16);
 lhs(N_int+1,N_int+1) = pols.'*v2c*dmat*(bterm(:)./ds);
 
-grad = gradgskern(rts,ejs,0,bdry,bdry);
+grad = gradkern(bdry,bdry);
 
 lhs(N_int+1,N_int+1) = -1/alpha + grad;
 
@@ -219,18 +219,6 @@ dudn = pols.'*v2c*dmat*(u1./ds)
 
 %%
 
-unew = usol.' + dudn*alpha*gskern(tot_chnkr,bdry);
-
-uright = unew(N_int+1:end);
-u = squeeze(reshape(uright,size(ext_chnkr.r(1,:,:))));
-u1 = u(:,1); 
-ds = ext_chnkr.d(1,:,1).';
-[~,~,v2c] = lege.exps(16);
-[pols,~] = lege.pols(-1,15);
-dudn_new = pols.'*v2c*dmat*(u1./ds)
-
-%%
-
 cparams = [];
 cparams.ifclosed = false;
 cparams.maxchunklen = 8 / abs(k);
@@ -244,7 +232,7 @@ cparams = [];
 cparams.ifclosed = false;
 cparams.maxchunklen = 2 / abs(k);
 cparams.ta = right_bd;
-cparams.tb = 1.2*right_bd; 
+cparams.tb = 1.2*right_bd;
 
 ref_chnkr = chunkerfunc(fcurve,cparams);
 ref_chnkr = sort(ref_chnkr);
@@ -287,10 +275,10 @@ hold on
 
 u = squeeze(reshape(usol,size(ref_chnkr.r(1,:,:))));
 u1 = u(:,1);
-ds = ref_chnkr.d(1,:,end).';
+ds = ref_chnkr.d(1,:,1).';
 [~,~,v2c] = lege.exps(16);
 [pols,~] = lege.pols(-1,15);
-dudn = pols.'*v2c*dmat*(u1./ds)
+dudn = pols.'*v2c*dmat*(u1./ds);
 
 load('gong.mat')
 sound(y)
@@ -306,12 +294,4 @@ function grad = gradgskern(rts,ejs,n,s,t)
 
     [~,grad] = helm2d.gsaxisym(rts,ejs,n,s,t);
     
-end
-
-function grad = get_grad(rts,ejs,src,targ,theta)
-
-    targ.r = [targ.r(1,:)*cos(theta); targ.r(1,:)*sin(theta)];
-    [~,grad] = helm2d.gshelm(rts,ejs,src,targ);
-    grad = grad(:,:,1)*cos(theta) + grad(:,:,2)*sin(theta);
-
 end
