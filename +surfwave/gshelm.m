@@ -2,7 +2,7 @@ function [val,grad,hess] = gshelm(rts,ejs,src,targ)
 %
 % computes the green's function for the integro-differential equation 
 % determined by the polynomial:
-%             alpha z^2 + beta + gamma/|z| = -2
+%             -alpha z^2 + beta + gamma/|z| = -2
 %
 % outputs are:
 % - val is the value of the Green's function centered at zero and
@@ -19,8 +19,8 @@ function [val,grad,hess] = gshelm(rts,ejs,src,targ)
 % ejs - residues (see notes)
 %
 
-src = src.r;
-targ = targ.r;
+% src = src.r;
+% targ = targ.r;
 
 [~,ns] = size(src);
 [~,nt] = size(targ);
@@ -57,7 +57,7 @@ for i = 1:3
 
     if (angle(rhoj) == 0) && (rhoj ~= 0)
 
-       [sk0,gradsk0,hesssk0] = helm2d.struveK(rhoj,src,targ);
+       [sk0,gradsk0,hesssk0] = surfwave.struveK(rhoj,src,targ);
        [h0,gradh0,hessh0] = chnk.helm2d.green(rhoj,src,targ);
 
        h0(r == 0) = 1/(2*pi)*(1i*pi/2  - eulergamma + log(2/rhoj));
@@ -123,7 +123,7 @@ for i = 1:3
 
     elseif rhoj ~= 0
 
-       [sk0,gradsk0,hesssk0] = helm2d.struveK(-rhoj,src,targ);
+       [sk0,gradsk0,hesssk0] = surfwave.struveK(-rhoj,src,targ);
 
        sk0x = gradsk0(:,:,1);
        sk0y = gradsk0(:,:,2);

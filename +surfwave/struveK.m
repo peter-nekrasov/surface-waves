@@ -60,7 +60,7 @@ if ilow
 end
 
 zt = r*rhoj;
-[cr0,cr1] = helm2d.struveR(zt);
+[cr0,cr1] = surfwave.struveR(zt);
 [h0,gradh0,hessh0] = chnk.helm2d.green(rhoj,src,targ);
 
 h0x = gradh0(:,:,1);

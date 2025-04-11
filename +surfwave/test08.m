@@ -1,5 +1,7 @@
 %% Finite difference test for derivatives of axisymmetric Greens functions
 
+addpath(genpath("~/Documents/GitHub/chunkie"))
+
 h = 0.05;
 xs = 2:h:(2+8*h);
 alpha = 0.5;

@@ -1,8 +1,8 @@
 close all
 
-alpha = 0.5;
-beta = 1+0.5i;
-gamma = 2;
+alpha = 1;
+beta = 600+0.2i;
+gamma = 1;
 [rts,ejs] = helm2d.find_roots(alpha,beta,gamma);
 k = rts(abs(angle(rts)) == min(abs(angle(rts))));
 
@@ -10,7 +10,7 @@ src = [];
 src.r = [0;0];
 
 targ = [];
-targ.r = [-20:0.01:20; (-20:0.01:20)*0];
+targ.r = [-1:0.01:1; (-1:0.01:1)*0];
 
 [val,~] = helm2d.gshelm(rts,ejs,src,targ);
 
