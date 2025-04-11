@@ -79,6 +79,22 @@ if strcmpi(type,'d')
   submat = -(grad(:,:,1).*nx + grad(:,:,2).*ny);
 end
 
+if strcmpi(type,'gs_d')
+  srcnorm = srcinfo.n;
+  [~,grad] = surfwave.gshelm(rts,ejs,src,targ);
+  nx = repmat(srcnorm(1,:),nt,1);
+  ny = repmat(srcnorm(2,:),nt,1);
+  submat = -(grad(:,:,1).*nx + grad(:,:,2).*ny);
+end
+
+if strcmpi(type,'gphi_d')
+  srcnorm = srcinfo.n;
+  [~,grad] = surfwave.gphihelm(rts,ejs,src,targ);
+  nx = repmat(srcnorm(1,:),nt,1);
+  ny = repmat(srcnorm(2,:),nt,1);
+  submat = -(grad(:,:,1).*nx + grad(:,:,2).*ny);
+end
+
 % normal derivative of single layer
 if strcmpi(type,'gs_sprime')
   targnorm = targinfo.n;
