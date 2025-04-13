@@ -10,7 +10,7 @@ chnkr = chnkr.sort();
 
 centre = [0.1; 0.2];
 
-alpha = 1;
+alpha = 2;
 beta = -2;
 gamma = 10;
 
@@ -38,19 +38,19 @@ xlim([-3 3])
 ylim([-3 3])
 title('Scattering object')
 
-% HELMHOLTZ NEUMANN
+% DIRICHLET
 
 fkern = @(s,t) surfwave.kern(rts,ejs, s, t,'gs_d');
 fkern3 = @(s,t) surfwave.kern(rts, ejs, s, t,'gphi_d');
 
 sysmat = chunkermat(chnkr,fkern);
 
-lhs = eye(chnkr.k*chnkr.nch) + sysmat;
+lhs = 1/alpha*eye(chnkr.k*chnkr.nch) + sysmat;
 
 rhs = chnkr.r(1,:).';
 sol = lhs\rhs;
 
-[tx,ty] = meshgrid(-3:0.06:3);
+[tx,ty] = meshgrid(-3+0.03:0.1:3+0.03);
 targs = [tx(:) ty(:)].';
 
 in = chunkerinterior(chnkr,targs);
@@ -125,7 +125,7 @@ err = abs(f1) / max([0.5*alpha*sum(lap.*us,'all'), 0.5*beta*us(5,5), gamma*sus])
 
 %% error in Dirichlet BC
 
-h = 0.25;
+h = 0.00001;
 
 bdy_r = chnkr.r(:,4,4);
 bdy_n = chnkr.n(:,4,4);

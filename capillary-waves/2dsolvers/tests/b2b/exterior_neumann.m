@@ -10,7 +10,7 @@ chnkr = chnkr.sort();
 
 centre = [0.1; 0.2];
 
-alpha = 1;
+alpha = 2;
 beta = -2;
 gamma = 10;
 
@@ -38,7 +38,7 @@ xlim([-3 3])
 ylim([-3 3])
 title('Scattering object')
 
-% HELMHOLTZ NEUMANN
+% NEUMANN
 
 fkern = @(s,t) surfwave.kern(rts,ejs, s, t,'gs_sprime');
 fkern2 = @(s,t) surfwave.kern(rts, ejs, s, t,'gs_s');
@@ -46,7 +46,7 @@ fkern3 = @(s,t) surfwave.kern(rts, ejs, s, t,'gphi_s');
 
 sysmat = chunkermat(chnkr,fkern);
 
-lhs = -eye(chnkr.k*chnkr.nch) + sysmat;
+lhs = -1/alpha*eye(chnkr.k*chnkr.nch) + sysmat;
 
 rhs = chnkr.r(1,:).';
 sol = lhs\rhs;
