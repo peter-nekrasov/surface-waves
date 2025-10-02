@@ -1,8 +1,9 @@
-close all
+addpath(genpath('~/Documents/GitHub/chunkie'))
+addpath(genpath('~/Documents/GitHub/surface-waves'))
 
 L = 10; % width of polynya
 
-n = 1; % mode number (0 or 1)
+n = 0; % mode number (0 or 1)
 
 alpha = 0.5;
 beta = 1+0.2i;
@@ -61,8 +62,8 @@ opts2.sing = 'log';
 eval_opts = [];
 eval_opts.forcesmooth = true;
 
-%S_tot = chunkermat(tot_chnkr,skern,opts)/(4*pi^2);
-S_i2i = chunkermat(int_chnkr,skern,opts)/(4*pi^2);
+% S_tot = chunkermat(tot_chnkr,skern,opts)/(4*pi^2);
+% S_i2i = chunkermat(int_chnkr,skern,opts)/(4*pi^2);
 Gs_i2i = chunkermat(int_chnkr,gskern,opts);
 Gs_t2t = chunkermat(tot_chnkr,gskern,opts);
 Gphi_i2i = chunkermat(int_chnkr,gphikern,opts);
@@ -87,10 +88,10 @@ title('f (RHS)')
 
 lhs = zeros(N_int+1);
 
-SG_phi_i2i = -1/gamma*(S_i2i + beta/2*Gphi_i2i + alpha/2*delGphi_i2i);
+% SG_phi_i2i = -1/gamma*(S_i2i + beta/2*Gphi_i2i + alpha/2*delGphi_i2i);
 
 lhs(1:N_int,1:N_int) = eye(N_int)/2 + beta/4*Gs_i2i + gamma/2*Gphi_i2i ...
-    + gamma*S_i2i + gamma*beta/2*Gphi_i2i + gamma^2*SG_phi_i2i;
+       - gamma*alpha/2*delGphi_i2i; % + gamma*S_i2i + gamma*beta/2*Gphi_i2i + gamma^2*SG_phi_i2i;
 
 
 lhs(1:N_int,N_int+1) = 1/2*gskern(bdry,int_chnkr) + gamma*gphikern(bdry,int_chnkr);
@@ -225,8 +226,8 @@ cparams.maxchunklen = 8 / abs(k);
 cparams.ta = 1.2*right_bd;
 cparams.tb = 60; 
 
-ext_chnkr = chunkerfunc(fcurve,cparams);
-ext_chnkr = sort(ext_chnkr);
+test_ext_chnkr = chunkerfunc(fcurve,cparams);
+test_ext_chnkr = sort(test_ext_chnkr);
 
 cparams = [];
 cparams.ifclosed = false;
@@ -237,8 +238,8 @@ cparams.tb = 1.2*right_bd;
 ref_chnkr = chunkerfunc(fcurve,cparams);
 ref_chnkr = sort(ref_chnkr);
 
-Gs_e2r = chunkerkernevalmat(ext_chnkr,gskern,ref_chnkr,eval_opts);
-Gphi_e2r = chunkerkernevalmat(ext_chnkr,gphikern,ref_chnkr,eval_opts);
+Gs_e2r = chunkerkernevalmat(test_ext_chnkr,gskern,ref_chnkr,eval_opts);
+Gphi_e2r = chunkerkernevalmat(test_ext_chnkr,gphikern,ref_chnkr,eval_opts);
 
 Gs_i2r = chunkerkernevalmat(int_chnkr,gskern,ref_chnkr,eval_opts);
 Gphi_i2r = chunkerkernevalmat(int_chnkr,gphikern,ref_chnkr,eval_opts);
